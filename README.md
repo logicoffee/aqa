@@ -22,12 +22,11 @@ schema = {
                 "user_id": "int64",
                 "payment_amount": "int64",
                 "payment_method": "string",
-                "items": "array<struct<item_id int64, amount int64>>",
             }
         }
     }
 }
 
 references = analyze("select user_id from shop.orders", schema, "production")
-print(references)
+print(references)  # {'production.shop.orders': {'user_id'}}
 ```
