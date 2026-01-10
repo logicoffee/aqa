@@ -90,20 +90,20 @@ test_cases = [
     {
         "name": "CTE pattern",
         "sql": """
-with amount_by_method as (
-    select
-        payment_method,
-        sum(payment_amount) as total_amount
-    from
-        shop.orders
-    group by
-        1
-)
-select
-    *
-from
-    amount_by_method
-""",
+            with amount_by_method as (
+                select
+                    payment_method,
+                    sum(payment_amount) as total_amount
+                from
+                    shop.orders
+                group by
+                    1
+            )
+            select
+                *
+            from
+                amount_by_method
+        """,
         "expected": {"production.shop.orders": {"payment_method", "payment_amount"}},
     },
     {
@@ -119,13 +119,13 @@ from
     {
         "name": "referencing a field in an unnested struct",
         "sql": """
-select
-    count(1)
-from
-    shop.orders
-where
-    exists (select 1 from unnest(items) where amount > 1)
-""",
+            select
+                count(1)
+            from
+                shop.orders
+            where
+                exists (select 1 from unnest(items) where amount > 1)
+        """,
         "expected": {"production.shop.orders": {"items"}},
     },
 ]
