@@ -1,6 +1,6 @@
 import pytest
 
-from analyzer import analyze
+from analytics_query_analyzer.analyzer import analyze
 
 
 schema = {
