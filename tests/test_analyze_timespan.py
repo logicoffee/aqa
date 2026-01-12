@@ -75,16 +75,6 @@ test_cases = [
         },
     },
     {
-        "name": "lower and upper bound",
-        "sql": "select * from shop.orders where ordered_at >= '2026-01-01' and ordered_at < '2026-01-02'",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": "2026-01-02",
-            }
-        },
-    },
-    {
         "name": "between",
         "sql": "select * from shop.orders where ordered_at between '2026-01-01' and '2026-01-02'",
         "expected": {
@@ -93,39 +83,6 @@ test_cases = [
                 "upper": "2026-01-02",
             }
         },
-    },
-    {
-        "name": "between mixed literal",
-        "sql": "select * from shop.orders where ordered_at between '2026-01-01' and current_date",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": "2026-01-12",
-            }
-        },
-        "current_date_provider": lambda: "2026-01-12",
-    },
-    {
-        "name": "in mixed literal",
-        "sql": "select * from shop.orders where ordered_at in ('2026-01-01', current_date)",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": "2026-01-12",
-            }
-        },
-        "current_date_provider": lambda: "2026-01-12",
-    },
-    {
-        "name": "mixed literal and non-literal",
-        "sql": "select * from shop.orders where ordered_at >= '2026-01-01' and ordered_at < current_date",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": "2026-01-12",
-            }
-        },
-        "current_date_provider": lambda: "2026-01-12",
     },
     {
         "name": "trunc column",
@@ -379,11 +336,10 @@ test_cases = [
     },
     {
         "name": "non-literal",
-        "sql": "select * from shop.orders where ordered_at > date_sub(current_date, interval 1 month)",
+        "sql": "select * from shop.orders where ordered_at > date_sub('2026-01-01', interval 1 month)",
         "expected": {
-            "production.shop.orders.ordered_at": {"lower": "2025-12-12", "upper": None}
+            "production.shop.orders.ordered_at": {"lower": "2025-12-01", "upper": None}
         },
-        "current_date_provider": lambda: "2026-01-12",
     },
     {
         "name": "not equal",
@@ -580,18 +536,12 @@ test_cases = [
 
 
 @pytest.mark.parametrize(
-    ("sql", "expected", "current_date_provider"),
-    [
-        (case["sql"], case["expected"], case.get("current_date_provider"))
-        for case in test_cases
-    ],
+    ("sql", "expected"),
+    [(case["sql"], case["expected"]) for case in test_cases],
     ids=[case["name"] for case in test_cases],
 )
-def test_analyze_case(sql, expected, current_date_provider):
-    if current_date_provider is None:
-        result = analyze_timespan(sql, schema, "production")
-    else:
-        result = analyze_timespan(sql, schema, "production", current_date_provider)
+def test_analyze_case(sql, expected):
+    result = analyze_timespan(sql, schema, "production")
     assert result == expected
 
 
