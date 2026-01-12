@@ -225,6 +225,36 @@ test_cases = [
         },
     },
     {
+        "name": "date sub day",
+        "sql": "select * from shop.orders where ordered_at > date_sub(date('2026-01-04'), interval 3 day)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "date add day",
+        "sql": "select * from shop.orders where ordered_at >= date_add(date('2026-01-04'), interval 2 day)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-06",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "date add month",
+        "sql": "select * from shop.orders where ordered_at >= date_add(date('2026-01-31'), interval 1 month)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-02-28",
+                "upper": None,
+            }
+        },
+    },
+    {
         "name": "trunc literal",
         "sql": "select * from shop.orders where ordered_at >= date_trunc('2026-02-10', month)",
         "expected": {

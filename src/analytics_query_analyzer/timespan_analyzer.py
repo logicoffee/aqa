@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime, timedelta, timezone
 from typing import TypeAlias
 
@@ -322,6 +323,8 @@ class TimespanAnalyzer:
         )
         if epoch_types and isinstance(expr, epoch_types):
             return self._extract_epoch_date(expr)
+        if isinstance(expr, (exp.DateAdd, exp.DateSub)):
+            return self._extract_date_arithmetic(expr)
         return None
 
     def _extract_parts_date(self, expr: exp.Expression) -> str | None:
@@ -375,6 +378,20 @@ class TimespanAnalyzer:
         except (OverflowError, OSError, ValueError):
             return None
 
+    def _extract_date_arithmetic(self, expr: exp.Expression) -> str | None:
+        base = self.extract_literal(expr.args.get("this") or expr.this)
+        if base is None:
+            return None
+        delta_value = self._extract_int_literal(expr.args.get("expression"))
+        if delta_value is None:
+            return None
+        unit = self._extract_unit_literal(expr.args.get("unit"))
+        if not unit:
+            return None
+        if isinstance(expr, exp.DateSub):
+            delta_value = -delta_value
+        return self._apply_date_delta(base, delta_value, unit)
+
     def _extract_trunc_date(self, expr: exp.Expression) -> str | None:
         target = expr.args.get("this") or expr.this
         unit_expr = expr.args.get("unit") or expr.args.get("part")
@@ -408,6 +425,11 @@ class TimespanAnalyzer:
     def _extract_int_literal(self, expr: exp.Expression | None) -> int | None:
         if expr is None:
             return None
+        if isinstance(expr, exp.Literal) and expr.is_string:
+            try:
+                return int(expr.this)
+            except (TypeError, ValueError):
+                return None
         if isinstance(expr, exp.Literal) and not expr.is_string:
             try:
                 return int(expr.this)
@@ -458,6 +480,30 @@ class TimespanAnalyzer:
         if unit in {"DAY"}:
             return parsed.date().isoformat()
         return None
+
+    def _apply_date_delta(self, value: str, delta: int, unit: str) -> str | None:
+        try:
+            parsed = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+        unit = unit.strip().upper()
+        if unit in {"DAY", "DAYS"}:
+            return (parsed.date() + timedelta(days=delta)).isoformat()
+        if unit in {"WEEK", "WEEKS"}:
+            return (parsed.date() + timedelta(weeks=delta)).isoformat()
+        if unit in {"MONTH", "MONTHS"}:
+            return self._shift_month(parsed.date(), delta)
+        if unit in {"YEAR", "YEARS"}:
+            return self._shift_month(parsed.date(), delta * 12)
+        return None
+
+    @staticmethod
+    def _shift_month(date_value: datetime.date, months: int) -> str | None:
+        year = date_value.year + (date_value.month - 1 + months) // 12
+        month = (date_value.month - 1 + months) % 12 + 1
+        last_day = calendar.monthrange(year, month)[1]
+        day = min(date_value.day, last_day)
+        return f"{year:04d}-{month:02d}-{day:02d}"
 
     def is_time_column(
         self, project: str, dataset: str, table: str, column_name: str
