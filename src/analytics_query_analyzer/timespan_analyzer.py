@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import TypeAlias
 
 from sqlglot import exp
@@ -168,16 +168,23 @@ class TimespanAnalyzer:
 
         left = comparison.left
         right = comparison.right
-        left_column = self.extract_column(left)
-        right_column = self.extract_column(right)
+        left_column, left_trunc_unit = self._extract_trunc_column(left)
+        right_column, right_trunc_unit = self._extract_trunc_column(right)
+        if left_column is None:
+            left_column = self.extract_column(left)
+        if right_column is None:
+            right_column = self.extract_column(right)
         column_side = None
         column = None
+        trunc_unit = None
         if left_column:
             column = left_column
             column_side = "left"
+            trunc_unit = left_trunc_unit
         elif right_column:
             column = right_column
             column_side = "right"
+            trunc_unit = right_trunc_unit
         else:
             left_window_column = self.extract_window_column(left)
             right_window_column = self.extract_window_column(right)
@@ -204,6 +211,8 @@ class TimespanAnalyzer:
         project, dataset, table, _ = full_path.split(".", 3)
         if not self.is_time_column(project, dataset, table, column_path):
             return {}
+        if trunc_unit and literal is not None:
+            literal = self._truncate_date(literal, trunc_unit)
         if literal is None:
             return {full_path: {"lower": None, "upper": None}}
 
@@ -269,6 +278,17 @@ class TimespanAnalyzer:
             return self.extract_literal(expr.this)
         if isinstance(expr, (exp.Date, exp.Datetime, exp.Timestamp, exp.Time)):
             return self.extract_literal(expr.this)
+        trunc_types = tuple(
+            expr_type
+            for expr_type in (
+                getattr(exp, "DateTrunc", None),
+                getattr(exp, "DatetimeTrunc", None),
+                getattr(exp, "TimestampTrunc", None),
+            )
+            if expr_type is not None
+        )
+        if trunc_types and isinstance(expr, trunc_types):
+            return self._extract_trunc_date(expr)
         parse_types = tuple(
             expr_type
             for expr_type in (
@@ -355,6 +375,15 @@ class TimespanAnalyzer:
         except (OverflowError, OSError, ValueError):
             return None
 
+    def _extract_trunc_date(self, expr: exp.Expression) -> str | None:
+        target = expr.args.get("this") or expr.this
+        unit_expr = expr.args.get("unit") or expr.args.get("part")
+        value = self.extract_literal(target)
+        unit = self._extract_unit_literal(unit_expr)
+        if value is None or not unit:
+            return None
+        return self._truncate_date(value, unit)
+
     def _extract_string_literal(self, expr: exp.Expression | None) -> str | None:
         if expr is None:
             return None
@@ -365,6 +394,16 @@ class TimespanAnalyzer:
         if isinstance(expr, exp.Paren):
             return self._extract_string_literal(expr.this)
         return None
+
+    def _extract_unit_literal(self, expr: exp.Expression | None) -> str | None:
+        if expr is None:
+            return None
+        if isinstance(expr, exp.Var):
+            return expr.this.upper()
+        literal = self._extract_string_literal(expr)
+        if literal:
+            return literal.upper()
+        return str(expr).upper()
 
     def _extract_int_literal(self, expr: exp.Expression | None) -> int | None:
         if expr is None:
@@ -378,6 +417,46 @@ class TimespanAnalyzer:
             return self._extract_int_literal(expr.this)
         if isinstance(expr, exp.Paren):
             return self._extract_int_literal(expr.this)
+        return None
+
+    def _extract_trunc_column(
+        self, expr: exp.Expression
+    ) -> tuple[exp.Column | None, str | None]:
+        trunc_types = tuple(
+            expr_type
+            for expr_type in (
+                getattr(exp, "DateTrunc", None),
+                getattr(exp, "DatetimeTrunc", None),
+                getattr(exp, "TimestampTrunc", None),
+            )
+            if expr_type is not None
+        )
+        if not trunc_types or not isinstance(expr, trunc_types):
+            return None, None
+        target = expr.args.get("this") or expr.this
+        unit_expr = expr.args.get("unit") or expr.args.get("part")
+        column = self.extract_column(target)
+        unit = self._extract_unit_literal(unit_expr)
+        return column, unit
+
+    def _truncate_date(self, value: str, unit: str) -> str | None:
+        try:
+            parsed = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+        unit = unit.strip().upper()
+        if unit in {"YEAR", "YYYY"}:
+            return f"{parsed.year:04d}-01-01"
+        if unit in {"QUARTER", "QTR"}:
+            quarter_start = ((parsed.month - 1) // 3) * 3 + 1
+            return f"{parsed.year:04d}-{quarter_start:02d}-01"
+        if unit in {"MONTH", "MON"}:
+            return f"{parsed.year:04d}-{parsed.month:02d}-01"
+        if unit in {"WEEK"}:
+            monday = parsed.date() - timedelta(days=parsed.weekday())
+            return monday.isoformat()
+        if unit in {"DAY"}:
+            return parsed.date().isoformat()
         return None
 
     def is_time_column(

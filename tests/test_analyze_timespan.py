@@ -125,6 +125,16 @@ test_cases = [
         },
     },
     {
+        "name": "trunc column",
+        "sql": "select * from shop.orders where date_trunc(ordered_at, month) >= '2026-02-10'",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-02-01",
+                "upper": None,
+            }
+        },
+    },
+    {
         "name": "date function string",
         "sql": "select * from shop.orders where ordered_at >= date('2026-01-01')",
         "expected": {
@@ -210,6 +220,16 @@ test_cases = [
         "expected": {
             "production.shop.orders.ordered_at": {
                 "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "trunc literal",
+        "sql": "select * from shop.orders where ordered_at >= date_trunc('2026-02-10', month)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-02-01",
                 "upper": None,
             }
         },
