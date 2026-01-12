@@ -205,6 +205,26 @@ test_cases = [
         },
     },
     {
+        "name": "timestamp function string with offset",
+        "sql": "select * from shop.orders where ordered_at >= timestamp('2026-01-01 00:00:00+09:00')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "timestamp function zone",
+        "sql": "select * from shop.orders where ordered_at >= timestamp('2026-01-01 00:00:00', 'Asia/Tokyo')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
         "name": "timestamp literal",
         "sql": "select * from shop.orders where ordered_at >= timestamp '2026-01-01 09:00:00'",
         "expected": {
