@@ -125,6 +125,186 @@ test_cases = [
         },
     },
     {
+        "name": "date function string",
+        "sql": "select * from shop.orders where ordered_at >= date('2026-01-01')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "date from parts",
+        "sql": "select * from shop.orders where ordered_at >= date(2026, 1, 1)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "date literal",
+        "sql": "select * from shop.orders where ordered_at >= date '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "datetime function string",
+        "sql": "select * from shop.orders where ordered_at >= datetime('2026-01-01 09:00:00')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "datetime from parts",
+        "sql": "select * from shop.orders where ordered_at >= datetime(2026, 1, 1, 9, 0, 0)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "datetime literal",
+        "sql": "select * from shop.orders where ordered_at >= datetime '2026-01-01 09:00:00'",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "timestamp function string",
+        "sql": "select * from shop.orders where ordered_at >= timestamp('2026-01-01 09:00:00')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "timestamp literal",
+        "sql": "select * from shop.orders where ordered_at >= timestamp '2026-01-01 09:00:00'",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "timestamp from date",
+        "sql": "select * from shop.orders where ordered_at >= timestamp(date '2026-01-01')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "cast date",
+        "sql": "select * from shop.orders where ordered_at >= cast('2026-01-01' as date)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "cast datetime",
+        "sql": "select * from shop.orders where ordered_at >= cast('2026-01-01 09:00:00' as datetime)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "cast timestamp",
+        "sql": "select * from shop.orders where ordered_at >= cast('2026-01-01 09:00:00' as timestamp)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "timestamp seconds",
+        "sql": "select * from shop.orders where ordered_at >= timestamp_seconds(1767229200)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "timestamp millis",
+        "sql": "select * from shop.orders where ordered_at >= timestamp_millis(1767229200000)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "parse date",
+        "sql": "select * from shop.orders where ordered_at >= parse_date('%Y-%m-%d', '2026-01-01')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "parse datetime",
+        "sql": "select * from shop.orders where ordered_at >= parse_datetime('%Y-%m-%d %H:%M:%S', '2026-01-01 09:00:00')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "parse timestamp",
+        "sql": "select * from shop.orders where ordered_at >= parse_timestamp('%Y-%m-%d %H:%M:%S', '2026-01-01 09:00:00')",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "differently formatted literals",
+        "sql": "select * from shop.orders where ordered_at >= '2026-01-01' and ordered_at > '2026-01-02 09:00:00'",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-02",
+                "upper": None,
+            }
+        },
+    },
+    {
         "name": "non-literal",
         "sql": "select * from shop.orders where ordered_at > date_sub(current_date, interval 1 month)",
         "expected": {
@@ -169,6 +349,13 @@ test_cases = [
     {
         "name": "lower > upper",
         "sql": "select * from shop.orders where ordered_at > '2026-01-02' and ordered_at < '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
+        },
+    },
+    {
+        "name": "lower > upper between",
+        "sql": "select * from shop.orders where ordered_at between '2026-01-02' and '2026-01-01'",
         "expected": {
             "production.shop.orders.ordered_at": {"lower": None, "upper": None}
         },

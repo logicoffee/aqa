@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import TypeAlias
 
 from sqlglot import exp
@@ -247,13 +248,136 @@ class TimespanAnalyzer:
 
     def extract_literal(self, expr: exp.Expression) -> str | None:
         if isinstance(expr, exp.Literal):
+            if expr.is_string:
+                return _normalize_iso_date(expr.this)
             return expr.this
+        if isinstance(expr, exp.TsOrDsToDatetime):
+            return self.extract_literal(expr.this)
         if isinstance(expr, exp.Cast):
+            target = expr.args.get("to")
+            if isinstance(target, exp.DataType):
+                target_type = target.this
+                if isinstance(target_type, exp.DataType.Type):
+                    target_name = target_type.value
+                else:
+                    target_name = str(target_type)
+                if target_name in {"DATE", "DATETIME", "TIMESTAMP", "TIMESTAMPTZ"}:
+                    return self.extract_literal(expr.this)
+                return None
             return self.extract_literal(expr.this)
         if isinstance(expr, exp.Paren):
             return self.extract_literal(expr.this)
-        if isinstance(expr, (exp.Date, exp.Timestamp, exp.Time)):
+        if isinstance(expr, (exp.Date, exp.Datetime, exp.Timestamp, exp.Time)):
             return self.extract_literal(expr.this)
+        parse_types = tuple(
+            expr_type
+            for expr_type in (
+                getattr(exp, "ParseDate", None),
+                getattr(exp, "ParseDatetime", None),
+                getattr(exp, "ParseTimestamp", None),
+                getattr(exp, "StrToDate", None),
+                getattr(exp, "StrToTime", None),
+            )
+            if expr_type is not None
+        )
+        if parse_types and isinstance(expr, parse_types):
+            return self._extract_parsed_date(expr)
+        parts_types = tuple(
+            expr_type
+            for expr_type in (
+                exp.DateFromParts,
+                getattr(exp, "DatetimeFromParts", None),
+                getattr(exp, "TimestampFromParts", None),
+            )
+            if expr_type is not None
+        )
+        if parts_types and isinstance(expr, parts_types):
+            return self._extract_parts_date(expr)
+        epoch_types = tuple(
+            expr_type
+            for expr_type in (
+                getattr(exp, "UnixToTime", None),
+            )
+            if expr_type is not None
+        )
+        if epoch_types and isinstance(expr, epoch_types):
+            return self._extract_epoch_date(expr)
+        return None
+
+    def _extract_parts_date(self, expr: exp.Expression) -> str | None:
+        parts = [
+            self.extract_literal(expr.args.get("year")),
+            self.extract_literal(expr.args.get("month")),
+            self.extract_literal(expr.args.get("day")),
+        ]
+        if any(part is None for part in parts):
+            return None
+        return self._format_date_parts(parts)
+
+    @staticmethod
+    def _format_date_parts(parts: list[str]) -> str | None:
+        try:
+            year = int(parts[0])
+            month = int(parts[1])
+            day = int(parts[2])
+        except (TypeError, ValueError):
+            return None
+        if not (1 <= month <= 12 and 1 <= day <= 31):
+            return None
+        return f"{year:04d}-{month:02d}-{day:02d}"
+
+    def _extract_parsed_date(self, expr: exp.Expression) -> str | None:
+        format_expr = expr.args.get("format") or expr.args.get("format_string")
+        string_expr = expr.args.get("string") or expr.args.get("this")
+        if format_expr is None or string_expr is None:
+            expressions = expr.expressions
+            if len(expressions) >= 2:
+                string_expr = expressions[0]
+                format_expr = expressions[1]
+        format_str = self._extract_string_literal(format_expr)
+        value_str = self._extract_string_literal(string_expr)
+        if not format_str or not value_str:
+            return None
+        try:
+            return datetime.strptime(value_str, format_str).date().isoformat()
+        except ValueError:
+            return None
+
+    def _extract_epoch_date(self, expr: exp.Expression) -> str | None:
+        value = self._extract_int_literal(expr.args.get("this") or expr.this)
+        if value is None:
+            return None
+        scale = self._extract_int_literal(expr.args.get("scale"))
+        if scale == 3:
+            value = value / 1000
+        try:
+            return datetime.fromtimestamp(value, tz=timezone.utc).date().isoformat()
+        except (OverflowError, OSError, ValueError):
+            return None
+
+    def _extract_string_literal(self, expr: exp.Expression | None) -> str | None:
+        if expr is None:
+            return None
+        if isinstance(expr, exp.Literal) and expr.is_string:
+            return expr.this
+        if isinstance(expr, exp.Cast):
+            return self._extract_string_literal(expr.this)
+        if isinstance(expr, exp.Paren):
+            return self._extract_string_literal(expr.this)
+        return None
+
+    def _extract_int_literal(self, expr: exp.Expression | None) -> int | None:
+        if expr is None:
+            return None
+        if isinstance(expr, exp.Literal) and not expr.is_string:
+            try:
+                return int(expr.this)
+            except (TypeError, ValueError):
+                return None
+        if isinstance(expr, exp.Cast):
+            return self._extract_int_literal(expr.this)
+        if isinstance(expr, exp.Paren):
+            return self._extract_int_literal(expr.this)
         return None
 
     def is_time_column(
@@ -351,3 +475,10 @@ class TimespanAnalyzer:
 
             merged[key] = {"lower": lower, "upper": upper}
         return merged
+
+
+def _normalize_iso_date(value: str) -> str | None:
+    try:
+        return datetime.fromisoformat(value).date().isoformat()
+    except ValueError:
+        return None
