@@ -48,6 +48,13 @@ test_cases = [
         },
     },
     {
+        "name": "upper bound (<=)",
+        "sql": "select * from shop.orders where ordered_at <= '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": "2026-01-01"}
+        },
+    },
+    {
         "name": "equality",
         "sql": "select * from shop.orders where ordered_at = '2026-01-01'",
         "expected": {
@@ -65,13 +72,6 @@ test_cases = [
                 "lower": "2026-01-01",
                 "upper": "2026-01-01",
             }
-        },
-    },
-    {
-        "name": "upper bound (<=)",
-        "sql": "select * from shop.orders where ordered_at <= '2026-01-01'",
-        "expected": {
-            "production.shop.orders.ordered_at": {"lower": None, "upper": "2026-01-01"}
         },
     },
     {
@@ -105,6 +105,54 @@ test_cases = [
         },
     },
     {
+        "name": "in mixed literal",
+        "sql": "select * from shop.orders where ordered_at in ('2026-01-01', current_date)",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": "2026-01-01",
+            }
+        },
+    },
+    {
+        "name": "mixed literal and non-literal",
+        "sql": "select * from shop.orders where ordered_at >= '2026-01-01' and ordered_at < current_date",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
+            }
+        },
+    },
+    {
+        "name": "non-literal",
+        "sql": "select * from shop.orders where ordered_at > date_sub(current_date, interval 1 month)",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
+        },
+    },
+    {
+        "name": "not equal",
+        "sql": "select * from shop.orders where ordered_at != '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
+        },
+    },
+    {
+        "name": "not equal (alt)",
+        "sql": "select * from shop.orders where ordered_at <> '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
+        },
+    },
+    {
+        "name": "negation",
+        "sql": "select * from shop.orders where not ordered_at > '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": "2026-01-01"}
+        },
+    },
+    {
         "name": "multiple conditions (and)",
         "sql": "select * from orders where ordered_at > '2026-01-01' and ordered_at > '2026-01-02'",
         "expected": {
@@ -116,6 +164,13 @@ test_cases = [
         "sql": "select * from shop.orders where ordered_at > '2026-01-01' or ordered_at > '2026-01-02'",
         "expected": {
             "production.shop.orders.ordered_at": {"lower": "2026-01-01", "upper": None}
+        },
+    },
+    {
+        "name": "lower > upper",
+        "sql": "select * from shop.orders where ordered_at > '2026-01-02' and ordered_at < '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
         },
     },
     {
@@ -136,37 +191,6 @@ test_cases = [
                 "lower": "2026-01-01",
                 "upper": "2026-01-02",
             }
-        },
-    },
-    {
-        "name": "mixed literal and non-literal",
-        "sql": "select * from shop.orders where ordered_at >= '2026-01-01' and ordered_at < current_date",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": None,
-            }
-        },
-    },
-    {
-        "name": "negation",
-        "sql": "select * from shop.orders where not ordered_at > '2026-01-01'",
-        "expected": {
-            "production.shop.orders.ordered_at": {"lower": None, "upper": "2026-01-01"}
-        },
-    },
-    {
-        "name": "not equal",
-        "sql": "select * from shop.orders where ordered_at != '2026-01-01'",
-        "expected": {
-            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
-        },
-    },
-    {
-        "name": "not equal (alt)",
-        "sql": "select * from shop.orders where ordered_at <> '2026-01-01'",
-        "expected": {
-            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
         },
     },
     {
@@ -191,30 +215,6 @@ test_cases = [
         },
     },
     {
-        "name": "lower > upper",
-        "sql": "select * from shop.orders where ordered_at > '2026-01-02' and ordered_at < '2026-01-01'",
-        "expected": {
-            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
-        },
-    },
-    {
-        "name": "in mixed literal",
-        "sql": "select * from shop.orders where ordered_at in ('2026-01-01', current_date)",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": "2026-01-01",
-            }
-        },
-    },
-    {
-        "name": "non-literal",
-        "sql": "select * from shop.orders where ordered_at > date_sub(current_date, interval 1 month)",
-        "expected": {
-            "production.shop.orders.ordered_at": {"lower": None, "upper": None}
-        },
-    },
-    {
         "name": "cte",
         "sql": "with base as (select ordered_at from shop.orders) select * from base where ordered_at > '2026-01-01'",
         "expected": {
@@ -222,8 +222,8 @@ test_cases = [
         },
     },
     {
-        "name": "multi cte",
-        "sql": "with base as (select ordered_at from shop.orders), filtered as (select ordered_at from base where ordered_at >= '2026-01-01') select * from filtered where ordered_at < '2026-01-02'",
+        "name": "cte inner and outer",
+        "sql": "with base as (select ordered_at from shop.orders where ordered_at >= '2026-01-01') select * from base where ordered_at < '2026-01-02'",
         "expected": {
             "production.shop.orders.ordered_at": {
                 "lower": "2026-01-01",
@@ -232,8 +232,8 @@ test_cases = [
         },
     },
     {
-        "name": "cte inner and outer",
-        "sql": "with base as (select ordered_at from shop.orders where ordered_at >= '2026-01-01') select * from base where ordered_at < '2026-01-02'",
+        "name": "multi cte",
+        "sql": "with base as (select ordered_at from shop.orders), filtered as (select ordered_at from base where ordered_at >= '2026-01-01') select * from filtered where ordered_at < '2026-01-02'",
         "expected": {
             "production.shop.orders.ordered_at": {
                 "lower": "2026-01-01",
@@ -252,22 +252,22 @@ test_cases = [
         },
     },
     {
-        "name": "qualify clause",
-        "sql": "select min(ordered_at) over (partition by user_id) as first_ordered_at from shop.orders qualify first_ordered_at > '2026-01-01'",
-        "expected": {
-            "production.shop.orders.ordered_at": {
-                "lower": "2026-01-01",
-                "upper": None,
-            }
-        },
-    },
-    {
         "name": "join subquery",
         "sql": "select * from shop.users u join (select user_id, ordered_at from shop.orders) o on u.id = o.user_id and o.ordered_at < '2026-01-01'",
         "expected": {
             "production.shop.orders.ordered_at": {
                 "lower": None,
                 "upper": "2026-01-01",
+            }
+        },
+    },
+    {
+        "name": "qualify clause",
+        "sql": "select min(ordered_at) over (partition by user_id) as first_ordered_at from shop.orders qualify first_ordered_at > '2026-01-01'",
+        "expected": {
+            "production.shop.orders.ordered_at": {
+                "lower": "2026-01-01",
+                "upper": None,
             }
         },
     },
