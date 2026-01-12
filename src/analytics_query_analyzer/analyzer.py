@@ -18,7 +18,12 @@ def analyze(sql: str, schema: dict, default_project: str):
     return analyzer.analyze(qualified)
 
 
-def analyze_timespan(sql: str, schema: dict, default_project: str) -> dict:
+def analyze_timespan(
+    sql: str,
+    schema: dict,
+    default_project: str,
+    current_date_provider=None,
+) -> dict:
     dialect = dialects.BigQuery  # currently only support BigQuery
     expression = parse_one(sql, read=dialect)
 
@@ -28,7 +33,7 @@ def analyze_timespan(sql: str, schema: dict, default_project: str) -> dict:
         catalog=default_project,
         validate_qualify_columns=False,
     )
-    analyzer = TimespanAnalyzer(schema, default_project)
+    analyzer = TimespanAnalyzer(schema, default_project, current_date_provider)
     return analyzer.analyze(qualified)
 
 

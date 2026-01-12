@@ -1,6 +1,6 @@
 import calendar
-from datetime import datetime, timedelta, timezone
-from typing import TypeAlias
+from datetime import date, datetime, timedelta, timezone
+from typing import Callable, TypeAlias
 
 from sqlglot import exp
 from sqlglot.optimizer.scope import traverse_scope
@@ -12,9 +12,15 @@ TimespanResults: TypeAlias = dict[str, TimespanBounds]
 
 
 class TimespanAnalyzer:
-    def __init__(self, schema: dict, default_project: str):
+    def __init__(
+        self,
+        schema: dict,
+        default_project: str,
+        current_date_provider: Callable[[], str | date | datetime] | None = None,
+    ):
         self.schema = schema
         self.default_project = default_project
+        self.current_date_provider = current_date_provider or date.today
 
     def analyze(self, expression: exp.Expression) -> TimespanResults:
         if isinstance(expression, exp.Union):
@@ -261,6 +267,10 @@ class TimespanAnalyzer:
             if expr.is_string:
                 return _normalize_iso_date(expr.this)
             return expr.this
+        if isinstance(expr, exp.CurrentDate):
+            return self._evaluate_current_date()
+        if isinstance(expr, (exp.CurrentDatetime, exp.CurrentTimestamp)):
+            return self._evaluate_current_date()
         if isinstance(expr, exp.TsOrDsToDatetime):
             return self.extract_literal(expr.this)
         if isinstance(expr, exp.Cast):
@@ -325,6 +335,18 @@ class TimespanAnalyzer:
             return self._extract_epoch_date(expr)
         if isinstance(expr, (exp.DateAdd, exp.DateSub)):
             return self._extract_date_arithmetic(expr)
+        return None
+
+    def _evaluate_current_date(self) -> str | None:
+        if self.current_date_provider is None:
+            return None
+        value = self.current_date_provider()
+        if isinstance(value, datetime):
+            return value.date().isoformat()
+        if isinstance(value, date):
+            return value.isoformat()
+        if isinstance(value, str):
+            return _normalize_iso_date(value)
         return None
 
     def _extract_parts_date(self, expr: exp.Expression) -> str | None:
