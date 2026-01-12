@@ -14,7 +14,7 @@ def analyze(sql: str, schema: dict, default_project: str):
         catalog=default_project,
         validate_qualify_columns=False,
     )
-    analyzer = ReferencesAnalyzer()
+    analyzer = ReferencesAnalyzer(schema, default_project)
     return analyzer.analyze(qualified)
 
 

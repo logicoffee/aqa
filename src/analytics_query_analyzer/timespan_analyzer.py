@@ -1,8 +1,9 @@
 from typing import TypeAlias
 
 from sqlglot import exp
-from sqlglot.optimizer.scope import Scope, traverse_scope
+from sqlglot.optimizer.scope import traverse_scope
 
+from .column_resolver import resolve_column_path
 
 TimespanBounds: TypeAlias = dict[str, str | None]
 TimespanResults: TypeAlias = dict[str, TimespanBounds]
@@ -123,7 +124,9 @@ class TimespanAnalyzer:
             high = self.extract_literal(comparison.args.get("high"))
             if not column:
                 return {}
-            resolved = self.resolve_column_path(column, scope)
+            resolved = resolve_column_path(
+                column, scope, self.default_project, self.schema, self.extract_column
+            )
             if not resolved:
                 return {}
             full_path, column_path = resolved
@@ -138,7 +141,9 @@ class TimespanAnalyzer:
             column = self.extract_column(comparison.this)
             if not column:
                 return {}
-            resolved = self.resolve_column_path(column, scope)
+            resolved = resolve_column_path(
+                column, scope, self.default_project, self.schema, self.extract_column
+            )
             if not resolved:
                 return {}
             full_path, column_path = resolved
@@ -189,7 +194,9 @@ class TimespanAnalyzer:
         if not column:
             return {}
 
-        resolved = self.resolve_column_path(column, scope)
+        resolved = resolve_column_path(
+            column, scope, self.default_project, self.schema, self.extract_column
+        )
         if not resolved:
             return {}
         full_path, column_path = resolved
@@ -248,59 +255,6 @@ class TimespanAnalyzer:
         if isinstance(expr, (exp.Date, exp.Timestamp, exp.Time)):
             return self.extract_literal(expr.this)
         return None
-
-    def resolve_column_path(self, column: exp.Column, scope) -> tuple[str, str] | None:
-        table_alias = column.table
-        source = scope.sources.get(table_alias)
-        if isinstance(source, Scope):
-            select_expression = None
-            if source.expression:
-                named = source.expression.named_selects
-                if column.name in named:
-                    select_expression = source.expression.selects[
-                        named.index(column.name)
-                    ]
-            if not select_expression:
-                return None
-            if isinstance(select_expression, exp.Alias):
-                select_expression = select_expression.this
-            nested_column = self.extract_column(select_expression)
-            if not nested_column:
-                return None
-            return self.resolve_column_path(nested_column, source)
-        if not isinstance(source, exp.Table):
-            return None
-
-        project = source.catalog or self.default_project
-        dataset = source.db
-        table = source.name
-        if not dataset and project in self.schema:
-            matches = [
-                dataset_name
-                for dataset_name, tables in self.schema[project].items()
-                if table in tables
-            ]
-            if len(matches) == 1:
-                dataset = matches[0]
-            else:
-                return None
-        if not dataset:
-            return None
-
-        fields = []
-        parent = column.parent
-        while isinstance(parent, exp.Dot):
-            fields.append(parent.expression.name)
-            parent = parent.parent
-
-        if column.parts[0].name == column.table:
-            column_full_path = ".".join(p.name for p in column.parts[1:])
-        else:
-            column_full_path = ".".join(p.name for p in column.parts)
-        if fields:
-            column_full_path = column_full_path + "." + ".".join(fields)
-
-        return f"{project}.{dataset}.{table}.{column_full_path}", column_full_path
 
     def is_time_column(
         self, project: str, dataset: str, table: str, column_name: str
