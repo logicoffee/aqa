@@ -1,13 +1,18 @@
 import calendar
 from datetime import date, datetime, timedelta, timezone
-from typing import Callable, TypeAlias
+from typing import Callable, TypeAlias, TypedDict
 
 from sqlglot import exp
 from sqlglot.optimizer.scope import traverse_scope
 
 from .column_resolver import resolve_column_path
 
-TimespanBounds: TypeAlias = dict[str, date | None]
+
+class TimespanBounds(TypedDict):
+    lower: date | None
+    upper: date | None
+
+
 TimespanResults: TypeAlias = dict[str, TimespanBounds]
 
 
