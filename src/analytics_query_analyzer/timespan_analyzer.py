@@ -289,49 +289,23 @@ class TimespanAnalyzer:
             return self.extract_literal(expr.this)
         if isinstance(expr, (exp.Date, exp.Datetime, exp.Timestamp, exp.Time)):
             return self.extract_literal(expr.this)
-        trunc_types = tuple(
-            expr_type
-            for expr_type in (
-                getattr(exp, "DateTrunc", None),
-                getattr(exp, "DatetimeTrunc", None),
-                getattr(exp, "TimestampTrunc", None),
-            )
-            if expr_type is not None
-        )
-        if trunc_types and isinstance(expr, trunc_types):
+        trunc_types = (exp.DateTrunc, exp.DatetimeTrunc, exp.TimestampTrunc)
+        if isinstance(expr, trunc_types):
             return self._extract_trunc_date(expr)
-        parse_types = tuple(
-            expr_type
-            for expr_type in (
-                getattr(exp, "ParseDate", None),
-                getattr(exp, "ParseDatetime", None),
-                getattr(exp, "ParseTimestamp", None),
-                getattr(exp, "StrToDate", None),
-                getattr(exp, "StrToTime", None),
-            )
-            if expr_type is not None
+        parse_types = (
+            exp.ParseDatetime,
+            exp.StrToDate,
+            exp.StrToTime,
         )
-        if parse_types and isinstance(expr, parse_types):
+        if isinstance(expr, parse_types):
             return self._extract_parsed_date(expr)
-        parts_types = tuple(
-            expr_type
-            for expr_type in (
-                exp.DateFromParts,
-                getattr(exp, "DatetimeFromParts", None),
-                getattr(exp, "TimestampFromParts", None),
-            )
-            if expr_type is not None
+        parts_types = (
+            exp.DateFromParts,
+            exp.TimestampFromParts,
         )
-        if parts_types and isinstance(expr, parts_types):
+        if isinstance(expr, parts_types):
             return self._extract_parts_date(expr)
-        epoch_types = tuple(
-            expr_type
-            for expr_type in (
-                getattr(exp, "UnixToTime", None),
-            )
-            if expr_type is not None
-        )
-        if epoch_types and isinstance(expr, epoch_types):
+        if isinstance(expr, exp.UnixToTime):
             return self._extract_epoch_date(expr)
         if isinstance(expr, (exp.DateAdd, exp.DateSub)):
             return self._extract_date_arithmetic(expr)
@@ -447,12 +421,7 @@ class TimespanAnalyzer:
     def _extract_int_literal(self, expr: exp.Expression | None) -> int | None:
         if expr is None:
             return None
-        if isinstance(expr, exp.Literal) and expr.is_string:
-            try:
-                return int(expr.this)
-            except (TypeError, ValueError):
-                return None
-        if isinstance(expr, exp.Literal) and not expr.is_string:
+        if isinstance(expr, exp.Literal):
             try:
                 return int(expr.this)
             except (TypeError, ValueError):
@@ -466,16 +435,8 @@ class TimespanAnalyzer:
     def _extract_trunc_column(
         self, expr: exp.Expression
     ) -> tuple[exp.Column | None, str | None]:
-        trunc_types = tuple(
-            expr_type
-            for expr_type in (
-                getattr(exp, "DateTrunc", None),
-                getattr(exp, "DatetimeTrunc", None),
-                getattr(exp, "TimestampTrunc", None),
-            )
-            if expr_type is not None
-        )
-        if not trunc_types or not isinstance(expr, trunc_types):
+        trunc_types = (exp.DateTrunc, exp.DatetimeTrunc, exp.TimestampTrunc)
+        if not isinstance(expr, trunc_types):
             return None, None
         target = expr.args.get("this") or expr.this
         unit_expr = expr.args.get("unit") or expr.args.get("part")
@@ -520,7 +481,7 @@ class TimespanAnalyzer:
         return None
 
     @staticmethod
-    def _shift_month(date_value: datetime.date, months: int) -> str | None:
+    def _shift_month(date_value: date, months: int) -> str | None:
         year = date_value.year + (date_value.month - 1 + months) // 12
         month = (date_value.month - 1 + months) % 12 + 1
         last_day = calendar.monthrange(year, month)[1]
