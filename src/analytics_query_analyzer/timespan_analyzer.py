@@ -7,7 +7,7 @@ from sqlglot.optimizer.scope import traverse_scope
 
 from .column_resolver import resolve_column_path
 
-TimespanBounds: TypeAlias = dict[str, str | None]
+TimespanBounds: TypeAlias = dict[str, date | None]
 TimespanResults: TypeAlias = dict[str, TimespanBounds]
 
 
@@ -22,7 +22,10 @@ class TimespanAnalyzer:
         self.default_project = default_project
         self.current_date_provider = current_date_provider or date.today
 
-    def analyze(self, expression: exp.Expression) -> TimespanResults:
+    def analyze(self, expression: exp.Expression) -> dict[str, dict[str, str | None]]:
+        return _stringify_results(self._analyze_internal(expression))
+
+    def _analyze_internal(self, expression: exp.Expression) -> TimespanResults:
         if isinstance(expression, exp.Union):
             with_expr = expression.args.get("with")
             left = expression.this.copy()
@@ -30,8 +33,8 @@ class TimespanAnalyzer:
             if with_expr:
                 left.set("with", with_expr)
                 right.set("with", with_expr)
-            left_bounds = self.analyze(left)
-            right_bounds = self.analyze(right)
+            left_bounds = self._analyze_internal(left)
+            right_bounds = self._analyze_internal(right)
             return self.merge_bounds_union(left_bounds, right_bounds)
         return self.analyze_scopes(expression)
 
@@ -262,11 +265,11 @@ class TimespanAnalyzer:
             return columns[0]
         return None
 
-    def extract_literal(self, expr: exp.Expression) -> str | None:
+    def extract_literal(self, expr: exp.Expression) -> date | None:
         if isinstance(expr, exp.Literal):
             if expr.is_string:
                 return _normalize_iso_date(expr.this)
-            return expr.this
+            return None
         if isinstance(expr, exp.CurrentDate):
             return self._evaluate_current_date()
         if isinstance(expr, (exp.CurrentDatetime, exp.CurrentTimestamp)):
@@ -311,41 +314,33 @@ class TimespanAnalyzer:
             return self._extract_date_arithmetic(expr)
         return None
 
-    def _evaluate_current_date(self) -> str | None:
+    def _evaluate_current_date(self) -> date | None:
         if self.current_date_provider is None:
             return None
         value = self.current_date_provider()
         if isinstance(value, datetime):
-            return value.date().isoformat()
+            return value.date()
         if isinstance(value, date):
-            return value.isoformat()
+            return value
         if isinstance(value, str):
             return _normalize_iso_date(value)
         return None
 
-    def _extract_parts_date(self, expr: exp.Expression) -> str | None:
-        parts = [
-            self.extract_literal(expr.args.get("year")),
-            self.extract_literal(expr.args.get("month")),
-            self.extract_literal(expr.args.get("day")),
-        ]
-        if any(part is None for part in parts):
+    def _extract_parts_date(self, expr: exp.Expression) -> date | None:
+        year = self._extract_int_literal(expr.args.get("year"))
+        month = self._extract_int_literal(expr.args.get("month"))
+        day = self._extract_int_literal(expr.args.get("day"))
+        if year is None or month is None or day is None:
             return None
-        return self._format_date_parts(parts)
+        return self._format_date_parts(year, month, day)
 
     @staticmethod
-    def _format_date_parts(parts: list[str]) -> str | None:
-        try:
-            year = int(parts[0])
-            month = int(parts[1])
-            day = int(parts[2])
-        except (TypeError, ValueError):
-            return None
+    def _format_date_parts(year: int, month: int, day: int) -> date | None:
         if not (1 <= month <= 12 and 1 <= day <= 31):
             return None
-        return f"{year:04d}-{month:02d}-{day:02d}"
+        return date(year, month, day)
 
-    def _extract_parsed_date(self, expr: exp.Expression) -> str | None:
+    def _extract_parsed_date(self, expr: exp.Expression) -> date | None:
         format_expr = expr.args.get("format") or expr.args.get("format_string")
         string_expr = expr.args.get("string") or expr.args.get("this")
         if format_expr is None or string_expr is None:
@@ -358,11 +353,11 @@ class TimespanAnalyzer:
         if not format_str or not value_str:
             return None
         try:
-            return datetime.strptime(value_str, format_str).date().isoformat()
+            return datetime.strptime(value_str, format_str).date()
         except ValueError:
             return None
 
-    def _extract_epoch_date(self, expr: exp.Expression) -> str | None:
+    def _extract_epoch_date(self, expr: exp.Expression) -> date | None:
         value = self._extract_int_literal(expr.args.get("this") or expr.this)
         if value is None:
             return None
@@ -370,11 +365,11 @@ class TimespanAnalyzer:
         if scale == 3:
             value = value / 1000
         try:
-            return datetime.fromtimestamp(value, tz=timezone.utc).date().isoformat()
+            return datetime.fromtimestamp(value, tz=timezone.utc).date()
         except (OverflowError, OSError, ValueError):
             return None
 
-    def _extract_date_arithmetic(self, expr: exp.Expression) -> str | None:
+    def _extract_date_arithmetic(self, expr: exp.Expression) -> date | None:
         base = self.extract_literal(expr.args.get("this") or expr.this)
         if base is None:
             return None
@@ -388,7 +383,7 @@ class TimespanAnalyzer:
             delta_value = -delta_value
         return self._apply_date_delta(base, delta_value, unit)
 
-    def _extract_trunc_date(self, expr: exp.Expression) -> str | None:
+    def _extract_trunc_date(self, expr: exp.Expression) -> date | None:
         target = expr.args.get("this") or expr.this
         unit_expr = expr.args.get("unit") or expr.args.get("part")
         value = self.extract_literal(target)
@@ -444,49 +439,43 @@ class TimespanAnalyzer:
         unit = self._extract_unit_literal(unit_expr)
         return column, unit
 
-    def _truncate_date(self, value: str, unit: str) -> str | None:
-        try:
-            parsed = datetime.fromisoformat(value)
-        except ValueError:
-            return None
+    def _truncate_date(self, value: date, unit: str) -> date | None:
+        parsed = value
         unit = unit.strip().upper()
         if unit in {"YEAR", "YYYY"}:
-            return f"{parsed.year:04d}-01-01"
+            return date(parsed.year, 1, 1)
         if unit in {"QUARTER", "QTR"}:
             quarter_start = ((parsed.month - 1) // 3) * 3 + 1
-            return f"{parsed.year:04d}-{quarter_start:02d}-01"
+            return date(parsed.year, quarter_start, 1)
         if unit in {"MONTH", "MON"}:
-            return f"{parsed.year:04d}-{parsed.month:02d}-01"
+            return date(parsed.year, parsed.month, 1)
         if unit in {"WEEK"}:
-            monday = parsed.date() - timedelta(days=parsed.weekday())
-            return monday.isoformat()
+            monday = parsed - timedelta(days=parsed.weekday())
+            return monday
         if unit in {"DAY"}:
-            return parsed.date().isoformat()
+            return parsed
         return None
 
-    def _apply_date_delta(self, value: str, delta: int, unit: str) -> str | None:
-        try:
-            parsed = datetime.fromisoformat(value)
-        except ValueError:
-            return None
+    def _apply_date_delta(self, value: date, delta: int, unit: str) -> date | None:
+        parsed = value
         unit = unit.strip().upper()
         if unit in {"DAY", "DAYS"}:
-            return (parsed.date() + timedelta(days=delta)).isoformat()
+            return parsed + timedelta(days=delta)
         if unit in {"WEEK", "WEEKS"}:
-            return (parsed.date() + timedelta(weeks=delta)).isoformat()
+            return parsed + timedelta(weeks=delta)
         if unit in {"MONTH", "MONTHS"}:
-            return self._shift_month(parsed.date(), delta)
+            return self._shift_month(parsed, delta)
         if unit in {"YEAR", "YEARS"}:
-            return self._shift_month(parsed.date(), delta * 12)
+            return self._shift_month(parsed, delta * 12)
         return None
 
     @staticmethod
-    def _shift_month(date_value: date, months: int) -> str | None:
+    def _shift_month(date_value: date, months: int) -> date | None:
         year = date_value.year + (date_value.month - 1 + months) // 12
         month = (date_value.month - 1 + months) % 12 + 1
         last_day = calendar.monthrange(year, month)[1]
         day = min(date_value.day, last_day)
-        return f"{year:04d}-{month:02d}-{day:02d}"
+        return date(year, month, day)
 
     def is_time_column(
         self, project: str, dataset: str, table: str, column_name: str
@@ -585,8 +574,18 @@ class TimespanAnalyzer:
         return merged
 
 
-def _normalize_iso_date(value: str) -> str | None:
+def _normalize_iso_date(value: str) -> date | None:
     try:
-        return datetime.fromisoformat(value).date().isoformat()
+        return datetime.fromisoformat(value).date()
     except ValueError:
         return None
+
+
+def _stringify_results(results: TimespanResults) -> dict[str, dict[str, str | None]]:
+    output: dict[str, dict[str, str | None]] = {}
+    for key, bounds in results.items():
+        output[key] = {
+            "lower": bounds["lower"].isoformat() if bounds["lower"] else None,
+            "upper": bounds["upper"].isoformat() if bounds["upper"] else None,
+        }
+    return output
