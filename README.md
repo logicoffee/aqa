@@ -1,6 +1,6 @@
 # analytics-query-analyzer
 
-Analytics Query Analyzer
+Extract table/column references and time bounds from analytics SQL.
 
 ## Install
 
@@ -8,7 +8,16 @@ Analytics Query Analyzer
 pip install analytics-query-analyzer
 ```
 
+## Support
+
+BigQuery is currently supported and tested.
+Schema format follows sqlglot's conventions (nested fields are expressed as nested dicts).
+
 ## Usage
+
+### analyze
+
+Extract table/column references from a query.
 
 ```python
 from analytics_query_analyzer import analyze
@@ -20,31 +29,35 @@ schema = {
                 "id": "int64",
                 "ordered_at": "datetime",
                 "user_id": "int64",
-                "payment_amount": "int64",
-                "payment_method": "string",
-            }
-        }
-    }
+                "payment": {
+                    "amount": "int64",
+                    "method": "string",
+                },
+            },
+        },
+    },
 }
-
-references = analyze("select user_id from shop.orders", schema, "production")
-print(references)  # {'production.shop.orders': {'user_id'}}
-```
-
-### Timespan analysis
-
-```python
-from analytics_query_analyzer import analyze_timespan
 
 sql = """
 select
-    sum(payment_amount)
+    id,
+    user_id,
+    payment.amount
 from
     shop.orders
-where
-    ordered_at >= "2025-01-01"
-    and ordered_at < "2026-01-01"
 """
+
+references = analyze(sql, schema, "production")
+print(references)
+# {"production.shop.orders": {"id", "user_id", "payment.amount"}}
+```
+
+### analyze_timespan
+
+Extract time bounds from filters.
+
+```python
+from analytics_query_analyzer import analyze_timespan
 
 schema = {
     "production": {
@@ -53,12 +66,20 @@ schema = {
                 "id": "int64",
                 "ordered_at": "datetime",
                 "user_id": "int64",
-                "payment_amount": "int64",
-                "payment_method": "string",
-            }
-        }
-    }
+            },
+        },
+    },
 }
+
+sql = """
+select
+    *
+from
+    shop.orders
+where
+    ordered_at >= "2025-01-01"
+    and ordered_at < "2026-01-01"
+"""
 
 timespans = analyze_timespan(sql, schema, "production")
 print(timespans)
@@ -70,7 +91,7 @@ print(timespans)
 # }
 ```
 
-If you want to make `current_date()` deterministic in tests, pass a provider:
+To make `current_date()` deterministic in tests, pass a provider:
 
 ```python
 timespans = analyze_timespan(
