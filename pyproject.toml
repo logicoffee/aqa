@@ -7,6 +7,10 @@ name = "analytics-query-analyzer"
 description = "Analytics Query Analyzer"
 readme = "README.md"
 requires-python = ">=3.13"
+license = {text = "MIT"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
 dependencies = [
     "sqlglot>=28",
 ]
