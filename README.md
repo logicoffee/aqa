@@ -1,7 +1,6 @@
 # analytics-query-analyzer
 
 Analyze analytics SQL to extract referenced tables/columns and time bounds.
-Designed to work with sqlglot-style schemas.
 
 ## Install
 
@@ -20,13 +19,13 @@ pip install analytics-query-analyzer[bigquery]
 ## Support
 
 BigQuery is currently supported and tested.
-The schema format follows sqlglot conventions, with nested fields represented as nested dicts.
 
 ## Usage
 
 ### analyze
 
 Extract table/column references from a query.
+Schemas follow sqlglot conventions, with nested fields represented as nested dicts.
 
 ```python
 from analytics_query_analyzer import analyze
@@ -100,7 +99,7 @@ print(timespans)
 # }
 ```
 
-To make `current_date()` deterministic in tests, pass a provider:
+To make `current_date()` deterministic, pass a provider:
 
 ```python
 timespans = analyze_timespan(
