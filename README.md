@@ -128,8 +128,8 @@ schema = build_schema(dialects.BigQuery, "my_project", "my_schema", "my_table")
 print(schema)
 ```
 
-Authentication uses Application Default Credentials (ADC).
-Only BigQuery is supported for `build_schema`.
-When `table` is omitted, it scans all tables in the dataset.
-When both `dataset` and `table` are omitted, it scans all datasets in the project.
-The returned `schema` can be passed directly to `analyze` and `analyze_timespan`.
+- Authentication uses Application Default Credentials (ADC).
+- Only BigQuery is supported for `build_schema`.
+- When `table` is omitted, it scans all tables in the dataset.
+- When both `dataset` and `table` are omitted, it scans all datasets in the project.
+- The returned `schema` can be passed directly to `analyze` and `analyze_timespan`.
