@@ -94,7 +94,7 @@ where
     and ordered_at < "2026-01-01"
 """
 
-timespans = analyze_timespan(dialect.BigQuery, sql, schema, "production")
+timespans = analyze_timespan(dialects.BigQuery, sql, schema, "production")
 print(timespans)
 # {
 #   "production.shop.orders.ordered_at": {
@@ -108,6 +108,7 @@ To make `current_date()` deterministic, pass a provider:
 
 ```python
 timespans = analyze_timespan(
+    dialects.BigQuery,
     "select * from shop.orders where ordered_at >= current_date()",
     schema,
     "production",

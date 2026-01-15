@@ -1,4 +1,5 @@
 import pytest
+from sqlglot import dialects
 
 from analytics_query_analyzer.analyzer import analyze_timespan
 
@@ -541,14 +542,18 @@ test_cases = [
     ids=[case["name"] for case in test_cases],
 )
 def test_analyze_case(sql, expected):
-    result = analyze_timespan(sql, schema, "production")
+    result = analyze_timespan(dialects.BigQuery, sql, schema, "production")
     assert result == expected
 
 
 def test_current_date_provider():
     sql = "select * from shop.orders where ordered_at >= current_date()"
     result = analyze_timespan(
-        sql, schema, "production", current_date_provider=lambda: "2026-01-01"
+        dialects.BigQuery,
+        sql,
+        schema,
+        "production",
+        current_date_provider=lambda: "2026-01-01",
     )
     assert result == {
         "production.shop.orders.ordered_at": {"lower": "2026-01-01", "upper": None}
@@ -558,7 +563,11 @@ def test_current_date_provider():
 def test_current_datetime_provider():
     sql = "select * from shop.orders where ordered_at >= current_datetime()"
     result = analyze_timespan(
-        sql, schema, "production", current_date_provider=lambda: "2026-01-01"
+        dialects.BigQuery,
+        sql,
+        schema,
+        "production",
+        current_date_provider=lambda: "2026-01-01",
     )
     assert result == {
         "production.shop.orders.ordered_at": {"lower": "2026-01-01", "upper": None}
@@ -568,7 +577,11 @@ def test_current_datetime_provider():
 def test_current_timestamp_provider():
     sql = "select * from shop.orders where ordered_at >= current_timestamp()"
     result = analyze_timespan(
-        sql, schema, "production", current_date_provider=lambda: "2026-01-01"
+        dialects.BigQuery,
+        sql,
+        schema,
+        "production",
+        current_date_provider=lambda: "2026-01-01",
     )
     assert result == {
         "production.shop.orders.ordered_at": {"lower": "2026-01-01", "upper": None}

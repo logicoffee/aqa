@@ -1,4 +1,5 @@
 import pytest
+from sqlglot import dialects
 
 from analytics_query_analyzer.analyzer import analyze
 
@@ -137,5 +138,5 @@ test_cases = [
     ids=[case["name"] for case in test_cases],
 )
 def test_analyze_case(sql, expected):
-    result = analyze(sql, schema, "production")
+    result = analyze(dialects.BigQuery, sql, schema, "production")
     assert result == expected
