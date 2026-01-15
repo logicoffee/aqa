@@ -20,15 +20,19 @@ pip install analytics-query-analyzer[bigquery]
 
 BigQuery is currently supported and tested.
 
+## Schema format
+
+Schemas follow sqlglot conventions, with nested fields represented as nested dicts.
+
 ## Usage
 
 ### analyze
 
 Extract table/column references from a query.
-Schemas follow sqlglot conventions, with nested fields represented as nested dicts.
 
 ```python
 from analytics_query_analyzer import analyze
+from sqlglot import dialects
 
 schema = {
     "production": {
@@ -55,7 +59,7 @@ from
     shop.orders
 """
 
-references = analyze(sql, schema, "production")
+references = analyze(dialects.BigQuery, sql, schema, "production")
 print(references)
 # {"production.shop.orders": {"id", "user_id", "payment.amount"}}
 ```
@@ -66,6 +70,7 @@ Extract time bounds from filters.
 
 ```python
 from analytics_query_analyzer import analyze_timespan
+from sqlglot import dialects
 
 schema = {
     "production": {
@@ -89,7 +94,7 @@ where
     and ordered_at < "2026-01-01"
 """
 
-timespans = analyze_timespan(sql, schema, "production")
+timespans = analyze_timespan(dialect.BigQuery, sql, schema, "production")
 print(timespans)
 # {
 #   "production.shop.orders.ordered_at": {
@@ -115,13 +120,16 @@ timespans = analyze_timespan(
 Fetch a schema dictionary from BigQuery.
 
 ```python
-from analytics_query_analyzer import Dwh, build_schema
+from sqlglot import dialects
 
-schema = build_schema(Dwh.BigQuery, "my_project", "my_schema", "my_table")
+from analytics_query_analyzer import build_schema
+
+schema = build_schema(dialects.BigQuery, "my_project", "my_schema", "my_table")
 print(schema)
 ```
 
 Authentication uses Application Default Credentials (ADC).
+Only BigQuery is supported for `build_schema`.
 When `table` is omitted, it scans all tables in the dataset.
 When both `dataset` and `table` are omitted, it scans all datasets in the project.
 The returned `schema` can be passed directly to `analyze` and `analyze_timespan`.

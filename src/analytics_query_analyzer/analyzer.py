@@ -4,8 +4,21 @@ from .references_analyzer import ReferencesAnalyzer
 from .timespan_analyzer import TimespanAnalyzer
 
 
-def analyze(sql: str, schema: dict, default_project: str):
-    dialect = dialects.BigQuery  # currently only support BigQuery
+def _resolve_dialect(
+    dialect: str | type[dialects.Dialect],
+) -> type[dialects.Dialect]:
+    if isinstance(dialect, str):
+        return dialects.get_or_raise(dialect.lower())
+    return dialect
+
+
+def analyze(
+    dialect: str | type[dialects.Dialect],
+    sql: str,
+    schema: dict,
+    default_project: str,
+):
+    dialect = _resolve_dialect(dialect)
     expression = parse_one(sql, read=dialect)
 
     qualified = optimizer.qualify.qualify(
@@ -19,12 +32,13 @@ def analyze(sql: str, schema: dict, default_project: str):
 
 
 def analyze_timespan(
+    dialect: str | type[dialects.Dialect],
     sql: str,
     schema: dict,
     default_project: str,
     current_date_provider=None,
 ) -> dict:
-    dialect = dialects.BigQuery  # currently only support BigQuery
+    dialect = _resolve_dialect(dialect)
     expression = parse_one(sql, read=dialect)
 
     qualified = optimizer.qualify.qualify(

@@ -1,14 +1,20 @@
-from enum import Enum
+from sqlglot import dialects
+
+SUPPORTED_DIALECTS = {dialects.BigQuery}
 
 
-class Dwh(str, Enum):
-    BigQuery = "bigquery"
-
-
-def build_schema(dwh: Dwh | str, database: str, schema: str | None, table: str | None):
-    resolved = dwh if isinstance(dwh, Dwh) else Dwh(dwh.lower())
-    if resolved is Dwh.BigQuery:
-        return _build_schema_bigquery(database, schema, table)
+def build_schema(
+    dialect: str | type[dialects.Dialect],
+    database: str,
+    schema: str | None,
+    table: str | None,
+):
+    resolved = (
+        dialects.get_or_raise(dialect.lower()) if isinstance(dialect, str) else dialect
+    )
+    if resolved not in SUPPORTED_DIALECTS:
+        raise ValueError(f"Unsupported dialect for build_schema: {resolved.__name__}")
+    return _build_schema_bigquery(database, schema, table)
 
 
 def _build_schema_bigquery(project: str, dataset: str | None, table: str | None):
