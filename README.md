@@ -120,9 +120,8 @@ timespans = analyze_timespan(
 Fetch a schema dictionary from BigQuery.
 
 ```python
-from sqlglot import dialects
-
 from analytics_query_analyzer import build_schema
+from sqlglot import dialects
 
 schema = build_schema(dialects.BigQuery, "my_project", "my_schema", "my_table")
 print(schema)
