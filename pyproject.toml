@@ -16,6 +16,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+bigquery = ["google-cloud-bigquery"]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 

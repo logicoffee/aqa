@@ -1,17 +1,26 @@
 # analytics-query-analyzer
 
-Extract table/column references and time bounds from analytics SQL.
+Analyze analytics SQL to extract referenced tables/columns and time bounds.
+Designed to work with sqlglot-style schemas.
 
 ## Install
+
+Base install:
 
 ```bash
 pip install analytics-query-analyzer
 ```
 
+BigQuery extras (only needed for `build_schema`):
+
+```bash
+pip install analytics-query-analyzer[bigquery]
+```
+
 ## Support
 
 BigQuery is currently supported and tested.
-Schema format follows sqlglot's conventions (nested fields are expressed as nested dicts).
+The schema format follows sqlglot conventions, with nested fields represented as nested dicts.
 
 ## Usage
 
@@ -101,3 +110,19 @@ timespans = analyze_timespan(
     current_date_provider=lambda: "2026-01-01",
 )
 ```
+
+### build_schema
+
+Fetch a schema dictionary from BigQuery.
+
+```python
+from analytics_query_analyzer import Dwh, build_schema
+
+schema = build_schema(Dwh.BigQuery, "my_project", "my_schema", "my_table")
+print(schema)
+```
+
+Authentication uses Application Default Credentials (ADC).
+When `table` is omitted, it scans all tables in the dataset.
+When both `dataset` and `table` are omitted, it scans all datasets in the project.
+The returned `schema` can be passed directly to `analyze` and `analyze_timespan`.
