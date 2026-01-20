@@ -16,6 +16,12 @@ BigQuery extras (only needed for `build_schema`):
 pip install analytics-query-analyzer[bigquery]
 ```
 
+Redshift extras (only needed for `build_schema`):
+
+```bash
+pip install analytics-query-analyzer[redshift]
+```
+
 ## Support
 
 BigQuery is currently supported and tested.
@@ -129,7 +135,22 @@ print(schema)
 ```
 
 - Authentication uses Application Default Credentials (ADC).
-- Only BigQuery is supported for `build_schema`.
 - When `table` is omitted, it scans all tables in the dataset.
 - When both `dataset` and `table` are omitted, it scans all datasets in the project.
 - The returned `schema` can be passed directly to `analyze` and `analyze_timespan`.
+
+Fetching from Redshift is also supported:
+
+```python
+from analytics_query_analyzer import build_schema
+from sqlglot import dialects
+
+schema = build_schema(dialects.Redshift, "my_database", "public", "orders")
+print(schema)
+```
+
+Redshift authentication supports two modes:
+
+- Set `REDSHIFT_HOST`, `REDSHIFT_USER`, and `REDSHIFT_PASSWORD` (optional `REDSHIFT_PORT`).
+- Set `REDSHIFT_CLUSTER_IDENTIFIER`, `REDSHIFT_REGION`, and `REDSHIFT_DB_USER` to use IAM.
+- Use `AWS_PROFILE` if you want to select a non-default AWS profile.
