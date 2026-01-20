@@ -315,8 +315,10 @@ class TimespanAnalyzer:
             return self._extract_parts_date(expr)
         if isinstance(expr, exp.UnixToTime):
             return self._extract_epoch_date(expr)
-        if isinstance(expr, (exp.DateAdd, exp.DateSub)):
+        if isinstance(expr, (exp.DateAdd, exp.DateSub, exp.TsOrDsAdd)):
             return self._extract_date_arithmetic(expr)
+        if isinstance(expr, (exp.Add, exp.Sub)):
+            return self._extract_interval_arithmetic(expr)
         return None
 
     def _evaluate_current_date(self) -> date | None:
@@ -388,6 +390,27 @@ class TimespanAnalyzer:
             delta_value = -delta_value
         return self._apply_date_delta(base, delta_value, unit)
 
+    def _extract_interval_arithmetic(self, expr: exp.Expression) -> date | None:
+        left = expr.args.get("this")
+        right = expr.args.get("expression")
+        if isinstance(right, exp.Interval):
+            base = self.extract_literal(left)
+            delta = self._extract_int_literal(right.args.get("this"))
+            unit = self._extract_unit_literal(right.args.get("unit"))
+            if base is None or delta is None or not unit:
+                return None
+            if isinstance(expr, exp.Sub):
+                delta = -delta
+            return self._apply_date_delta(base, delta, unit)
+        if isinstance(left, exp.Interval):
+            base = self.extract_literal(right)
+            delta = self._extract_int_literal(left.args.get("this"))
+            unit = self._extract_unit_literal(left.args.get("unit"))
+            if base is None or delta is None or not unit:
+                return None
+            return self._apply_date_delta(base, delta, unit)
+        return None
+
     def _extract_trunc_date(self, expr: exp.Expression) -> date | None:
         target = expr.args.get("this") or expr.this
         unit_expr = expr.args.get("unit") or expr.args.get("part")
@@ -425,7 +448,13 @@ class TimespanAnalyzer:
             try:
                 return int(expr.this)
             except (TypeError, ValueError):
-                return None
+                try:
+                    return int(float(expr.this))
+                except (TypeError, ValueError):
+                    return None
+        if isinstance(expr, exp.Neg):
+            value = self._extract_int_literal(expr.this)
+            return None if value is None else -value
         if isinstance(expr, exp.Cast):
             return self._extract_int_literal(expr.this)
         if isinstance(expr, exp.Paren):
