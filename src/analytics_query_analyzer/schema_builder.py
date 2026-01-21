@@ -80,12 +80,14 @@ def _build_schema_bigquery(project: str, dataset: str | None, table: str | None)
 def _redshift_connection_kwargs(database: str) -> dict[str, str | int | bool]:
     host = os.getenv("REDSHIFT_HOST")
     port = os.getenv("REDSHIFT_PORT")
-    user = os.getenv("REDSHIFT_USER")
-    password = os.getenv("REDSHIFT_PASSWORD")
 
     cluster_identifier = os.getenv("REDSHIFT_CLUSTER_IDENTIFIER")
     region = os.getenv("REDSHIFT_REGION")
-    db_user = os.getenv("REDSHIFT_DB_USER") or user
+    db_user = os.getenv("REDSHIFT_DB_USER")
+
+    user = os.getenv("REDSHIFT_USER")
+    password = os.getenv("REDSHIFT_PASSWORD")
+
     if cluster_identifier and region and db_user:
         kwargs = {
             "cluster_identifier": cluster_identifier,
@@ -100,11 +102,7 @@ def _redshift_connection_kwargs(database: str) -> dict[str, str | int | bool]:
                 kwargs["port"] = int(port)
         return kwargs
 
-    if host:
-        if not user or not password:
-            raise RuntimeError(
-                "Redshift host auth requires REDSHIFT_USER and REDSHIFT_PASSWORD."
-            )
+    if host and user and password:
         return {
             "host": host,
             "port": int(port) if port else 5439,

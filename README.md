@@ -152,5 +152,5 @@ print(schema)
 Redshift authentication supports two modes:
 
 - Set `REDSHIFT_HOST`, `REDSHIFT_USER`, and `REDSHIFT_PASSWORD` (optional `REDSHIFT_PORT`).
-- Set `REDSHIFT_CLUSTER_IDENTIFIER`, `REDSHIFT_REGION`, and `REDSHIFT_DB_USER` to use IAM.
+- Set `REDSHIFT_CLUSTER_IDENTIFIER`, `REDSHIFT_REGION`, and `REDSHIFT_DB_USER` to use IAM (you can also set `REDSHIFT_HOST`/`REDSHIFT_PORT`).
 - Use `AWS_PROFILE` if you want to select a non-default AWS profile.
