@@ -519,7 +519,16 @@ class TimespanAnalyzer:
             column_type = self.schema[project][dataset][table][column_root]
         except KeyError:
             return False
-        return str(column_type).lower() in {"datetime", "date", "timestamp"}
+        normalized = str(column_type).lower()
+        if normalized in {
+            "datetime",
+            "date",
+            "timestamp",
+            "timestamp without time zone",
+            "timestamp with time zone",
+        }:
+            return True
+        return False
 
     @staticmethod
     def merge_bounds_and(
