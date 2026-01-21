@@ -8,8 +8,8 @@ SUPPORTED_DIALECTS = {dialects.BigQuery, dialects.Redshift}
 def build_schema(
     dialect: str | type[dialects.Dialect],
     database: str,
-    schema: str | None,
-    table: str | None,
+    schema: str | None = None,
+    table: str | None = None,
 ):
     resolved = (
         dialects.get_or_raise(dialect.lower()) if isinstance(dialect, str) else dialect
