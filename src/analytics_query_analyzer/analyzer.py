@@ -16,7 +16,7 @@ def analyze(
     dialect: str | type[dialects.Dialect],
     sql: str,
     schema: dict,
-    default_project: str,
+    default_catalog: str,
 ):
     dialect = _resolve_dialect(dialect)
     expression = parse_one(sql, read=dialect)
@@ -24,10 +24,10 @@ def analyze(
     qualified = optimizer.qualify.qualify(
         expression,
         schema=schema,
-        catalog=default_project,
+        catalog=default_catalog,
         validate_qualify_columns=False,
     )
-    analyzer = ReferencesAnalyzer(schema, default_project)
+    analyzer = ReferencesAnalyzer(schema, default_catalog)
     return analyzer.analyze(qualified)
 
 
@@ -35,7 +35,7 @@ def analyze_timespan(
     dialect: str | type[dialects.Dialect],
     sql: str,
     schema: dict,
-    default_project: str,
+    default_catalog: str,
     current_date_provider=None,
 ) -> dict:
     dialect = _resolve_dialect(dialect)
@@ -44,10 +44,10 @@ def analyze_timespan(
     qualified = optimizer.qualify.qualify(
         expression,
         schema=schema,
-        catalog=default_project,
+        catalog=default_catalog,
         validate_qualify_columns=False,
     )
-    analyzer = TimespanAnalyzer(schema, default_project, current_date_provider)
+    analyzer = TimespanAnalyzer(schema, default_catalog, current_date_provider)
     return analyzer.analyze(qualified)
 
 

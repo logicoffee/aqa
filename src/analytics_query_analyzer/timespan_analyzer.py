@@ -20,11 +20,11 @@ class TimespanAnalyzer:
     def __init__(
         self,
         schema: dict,
-        default_project: str,
+        default_catalog: str,
         current_date_provider: Callable[[], str | date | datetime] | None = None,
     ):
         self.schema = schema
-        self.default_project = default_project
+        self.default_catalog = default_catalog
         self.current_date_provider = current_date_provider or date.today
 
     def analyze(self, expression: exp.Expression) -> dict[str, dict[str, str | None]]:
@@ -141,7 +141,7 @@ class TimespanAnalyzer:
             if not column:
                 return {}
             resolved = resolve_column_path(
-                column, scope, self.default_project, self.schema, self.extract_column
+                column, scope, self.default_catalog, self.schema, self.extract_column
             )
             if not resolved:
                 return {}
@@ -158,7 +158,7 @@ class TimespanAnalyzer:
             if not column:
                 return {}
             resolved = resolve_column_path(
-                column, scope, self.default_project, self.schema, self.extract_column
+                column, scope, self.default_catalog, self.schema, self.extract_column
             )
             if not resolved:
                 return {}
@@ -218,7 +218,7 @@ class TimespanAnalyzer:
             return {}
 
         resolved = resolve_column_path(
-            column, scope, self.default_project, self.schema, self.extract_column
+            column, scope, self.default_catalog, self.schema, self.extract_column
         )
         if not resolved:
             return {}
