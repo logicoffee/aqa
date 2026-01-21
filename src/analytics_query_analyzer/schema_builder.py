@@ -82,6 +82,24 @@ def _redshift_connection_kwargs(database: str) -> dict[str, str | int | bool]:
     port = os.getenv("REDSHIFT_PORT")
     user = os.getenv("REDSHIFT_USER")
     password = os.getenv("REDSHIFT_PASSWORD")
+
+    cluster_identifier = os.getenv("REDSHIFT_CLUSTER_IDENTIFIER")
+    region = os.getenv("REDSHIFT_REGION")
+    db_user = os.getenv("REDSHIFT_DB_USER") or user
+    if cluster_identifier and region and db_user:
+        kwargs = {
+            "cluster_identifier": cluster_identifier,
+            "database": database,
+            "db_user": db_user,
+            "region": region,
+            "iam": True,
+        }
+        if host:
+            kwargs["host"] = host
+            if port:
+                kwargs["port"] = int(port)
+        return kwargs
+
     if host:
         if not user or not password:
             raise RuntimeError(
@@ -93,18 +111,6 @@ def _redshift_connection_kwargs(database: str) -> dict[str, str | int | bool]:
             "database": database,
             "user": user,
             "password": password,
-        }
-
-    cluster_identifier = os.getenv("REDSHIFT_CLUSTER_IDENTIFIER")
-    region = os.getenv("REDSHIFT_REGION")
-    db_user = os.getenv("REDSHIFT_DB_USER") or user
-    if cluster_identifier and region and db_user:
-        return {
-            "cluster_identifier": cluster_identifier,
-            "database": database,
-            "db_user": db_user,
-            "region": region,
-            "iam": True,
         }
 
     raise RuntimeError(
