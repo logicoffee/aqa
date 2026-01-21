@@ -5,9 +5,9 @@ from .column_resolver import resolve_column_path
 
 
 class ReferencesAnalyzer:
-    def __init__(self, schema: dict, default_project: str):
+    def __init__(self, schema: dict, default_catalog: str):
         self.schema = schema
-        self.default_project = default_project
+        self.default_catalog = default_catalog
 
     def analyze(self, expression: exp.Expression) -> dict:
         references: dict[str, set[str]] = {}
@@ -17,7 +17,7 @@ class ReferencesAnalyzer:
                 resolved = resolve_column_path(
                     column,
                     scope,
-                    self.default_project,
+                    self.default_catalog,
                     self.schema,
                     _extract_column,
                 )

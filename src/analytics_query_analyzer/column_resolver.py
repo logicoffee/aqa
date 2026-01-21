@@ -5,7 +5,7 @@ from sqlglot.optimizer.scope import Scope
 def resolve_column_path(
     column: exp.Column,
     scope,
-    default_project: str,
+    default_catalog: str,
     schema: dict,
     column_extractor,
 ) -> tuple[str, str] | None:
@@ -25,12 +25,12 @@ def resolve_column_path(
         if not nested_column:
             return None
         return resolve_column_path(
-            nested_column, source, default_project, schema, column_extractor
+            nested_column, source, default_catalog, schema, column_extractor
         )
     if not isinstance(source, exp.Table):
         return None
 
-    project = source.catalog or default_project
+    project = source.catalog or default_catalog
     dataset = source.db
     table = source.name
     if not dataset and project in schema:
