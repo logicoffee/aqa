@@ -2,6 +2,11 @@ name: Publish to TestPyPI
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to publish (branch or tag)"
+        required: true
+        default: "main"
 
 jobs:
   build-and-publish:
@@ -14,6 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.ref }}
           fetch-depth: 0
 
       - name: Set up Python
