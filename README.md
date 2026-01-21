@@ -2,6 +2,10 @@
 
 Analyze analytics SQL to extract referenced tables/columns and time bounds.
 
+## Support
+
+BigQuery and Redshift are currently supported.
+
 ## Install
 
 Base install:
@@ -22,19 +26,13 @@ Redshift extras (only needed for `build_schema`):
 pip install analytics-query-analyzer[redshift]
 ```
 
-## Support
-
-BigQuery is currently supported and tested.
-
-## Schema format
-
-Schemas follow sqlglot conventions, with nested fields represented as nested dicts.
-
 ## Usage
 
 ### analyze
 
 Extract table/column references from a query.
+
+Schema format follows sqlglot conventions, with nested fields represented as nested dicts.
 
 ```python
 from analytics_query_analyzer import analyze
@@ -124,7 +122,7 @@ timespans = analyze_timespan(
 
 ### build_schema
 
-Fetch a schema dictionary from BigQuery.
+Fetch a schema dictionary from BigQuery or Redshift.
 
 ```python
 from analytics_query_analyzer import build_schema
