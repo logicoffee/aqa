@@ -9,7 +9,7 @@ class ReferencesAnalyzer:
         self.schema = schema
         self.default_catalog = default_catalog
 
-    def analyze(self, expression: exp.Expression) -> dict:
+    def analyze(self, expression: exp.Expression) -> list[dict[str, str]]:
         references: dict[str, set[str]] = {}
 
         for scope in traverse_scope(expression):
@@ -27,13 +27,30 @@ class ReferencesAnalyzer:
                 table_path = ".".join(full_path.split(".", 3)[:3])
                 _add(references, table_path, column_path)
 
-        return references
+        return _flatten_references(references)
 
 def _add(references: dict[str, set[str]], table: str, column: str):
     if table in references:
         references[table].add(column)
     else:
         references[table] = {column}
+
+
+def _flatten_references(references: dict[str, set[str]]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for table_path, columns in references.items():
+        database, schema, table = table_path.split(".", 2)
+        for column in columns:
+            rows.append(
+                {
+                    "database": database,
+                    "schema": schema,
+                    "table": table,
+                    "column": column,
+                }
+            )
+    rows.sort(key=lambda row: (row["database"], row["schema"], row["table"], row["column"]))
+    return rows
 
 
 def _extract_column(expr: exp.Expression) -> exp.Column | None:

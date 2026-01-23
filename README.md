@@ -65,7 +65,26 @@ from
 
 references = analyze(dialects.BigQuery, sql, schema, "production")
 print(references)
-# {"production.shop.orders": {"id", "user_id", "payment.amount"}}
+# [
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "id",
+#   },
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "payment.amount",
+#   },
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "user_id",
+#   },
+# ]
 ```
 
 ### analyze_timespan
