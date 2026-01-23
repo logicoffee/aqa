@@ -27,8 +27,8 @@ class TimespanAnalyzer:
         self.default_catalog = default_catalog
         self.current_date_provider = current_date_provider or date.today
 
-    def analyze(self, expression: exp.Expression) -> dict[str, dict[str, str | None]]:
-        return _stringify_results(self._analyze_internal(expression))
+    def analyze(self, expression: exp.Expression) -> list[dict[str, str | None]]:
+        return _flatten_timespans(_stringify_results(self._analyze_internal(expression)))
 
     def _analyze_internal(self, expression: exp.Expression) -> TimespanResults:
         if isinstance(expression, exp.Union):
@@ -632,3 +632,30 @@ def _stringify_results(results: TimespanResults) -> dict[str, dict[str, str | No
             "upper": bounds["upper"].isoformat() if bounds["upper"] else None,
         }
     return output
+
+
+def _flatten_timespans(
+    results: dict[str, dict[str, str | None]],
+) -> list[dict[str, str | None]]:
+    rows: list[dict[str, str | None]] = []
+    for full_path, bounds in results.items():
+        database, schema, table, column = full_path.split(".", 3)
+        rows.append(
+            {
+                "database": database,
+                "schema": schema,
+                "table": table,
+                "column": column,
+                "lower": bounds.get("lower"),
+                "upper": bounds.get("upper"),
+            }
+        )
+    rows.sort(
+        key=lambda row: (
+            row["database"] or "",
+            row["schema"] or "",
+            row["table"] or "",
+            row["column"] or "",
+        )
+    )
+    return rows

@@ -119,12 +119,16 @@ where
 
 timespans = analyze_timespan(dialects.BigQuery, sql, schema, "production")
 print(timespans)
-# {
-#   "production.shop.orders.ordered_at": {
+# [
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "ordered_at",
 #     "lower": "2025-01-01",
-#     "upper": "2026-01-01"
+#     "upper": "2026-01-01",
 #   }
-# }
+# ]
 ```
 
 To make `current_date()` deterministic, pass a provider:
