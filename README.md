@@ -130,10 +130,26 @@ print(timespans)
 #     "database": "production",
 #     "schema": "shop",
 #     "table": "orders",
+#     "column": "id",
+#     "lower": None,
+#     "upper": None,
+#   },
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
 #     "column": "ordered_at",
 #     "lower": "2025-01-01",
 #     "upper": "2026-01-01",
-#   }
+#   },
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "user_id",
+#     "lower": None,
+#     "upper": None,
+#   },
 # ]
 ```
 
