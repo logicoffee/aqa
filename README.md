@@ -87,12 +87,12 @@ print(references)
 # ]
 ```
 
-### analyze_timespan
+### analyze with time bounds
 
-Extract time bounds from filters.
+Extract time bounds from filters by enabling `with_timebounds`.
 
 ```python
-from analytics_query_analyzer import analyze_timespan
+from analytics_query_analyzer import analyze
 from sqlglot import dialects
 
 schema = {
@@ -117,9 +117,23 @@ where
     and ordered_at < "2026-01-01"
 """
 
-timespans = analyze_timespan(dialects.BigQuery, sql, schema, "production")
-print(timespans)
+timebounds = analyze(
+    dialects.BigQuery,
+    sql,
+    schema,
+    "production",
+    with_timebounds=True,
+)
+print(timebounds)
 # [
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "id",
+#     "lower": None,
+#     "upper": None,
+#   },
 #   {
 #     "database": "production",
 #     "schema": "shop",
@@ -127,18 +141,27 @@ print(timespans)
 #     "column": "ordered_at",
 #     "lower": "2025-01-01",
 #     "upper": "2026-01-01",
-#   }
+#   },
+#   {
+#     "database": "production",
+#     "schema": "shop",
+#     "table": "orders",
+#     "column": "user_id",
+#     "lower": None,
+#     "upper": None,
+#   },
 # ]
 ```
 
 To make `current_date()` deterministic, pass a provider:
 
 ```python
-timespans = analyze_timespan(
+timebounds = analyze(
     dialects.BigQuery,
     "select * from shop.orders where ordered_at >= current_date()",
     schema,
     "production",
+    with_timebounds=True,
     current_date_provider=lambda: "2026-01-01",
 )
 ```
@@ -158,7 +181,7 @@ print(schema)
 - Authentication uses Application Default Credentials (ADC).
 - When `table` is omitted, it scans all tables in the dataset.
 - When both `dataset` and `table` are omitted, it scans all datasets in the project.
-- The returned `schema` can be passed directly to `analyze` and `analyze_timespan`.
+- The returned `schema` can be passed directly to `analyze`.
 
 Fetching from Redshift is also supported:
 

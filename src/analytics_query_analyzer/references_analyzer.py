@@ -2,6 +2,7 @@ from sqlglot import exp
 from sqlglot.optimizer.scope import traverse_scope
 
 from .column_resolver import resolve_column_path
+from .types import ReferenceRow
 
 
 class ReferencesAnalyzer:
@@ -9,7 +10,7 @@ class ReferencesAnalyzer:
         self.schema = schema
         self.default_catalog = default_catalog
 
-    def analyze(self, expression: exp.Expression) -> list[dict[str, str]]:
+    def analyze(self, expression: exp.Expression) -> list[ReferenceRow]:
         references: dict[str, set[str]] = {}
 
         for scope in traverse_scope(expression):
@@ -36,20 +37,22 @@ def _add(references: dict[str, set[str]], table: str, column: str):
         references[table] = {column}
 
 
-def _flatten_references(references: dict[str, set[str]]) -> list[dict[str, str]]:
-    rows: list[dict[str, str]] = []
+def _flatten_references(references: dict[str, set[str]]) -> list[ReferenceRow]:
+    rows: list[ReferenceRow] = []
     for table_path, columns in references.items():
         database, schema, table = table_path.split(".", 2)
         for column in columns:
             rows.append(
-                {
-                    "database": database,
-                    "schema": schema,
-                    "table": table,
-                    "column": column,
-                }
+                ReferenceRow(
+                    database=database,
+                    schema=schema,
+                    table=table,
+                    column=column,
+                )
             )
-    rows.sort(key=lambda row: (row["database"], row["schema"], row["table"], row["column"]))
+    rows.sort(
+        key=lambda row: (row["database"], row["schema"], row["table"], row["column"])
+    )
     return rows
 
 
