@@ -6,6 +6,7 @@ from sqlglot import exp
 from sqlglot.optimizer.scope import traverse_scope
 
 from .column_resolver import resolve_column_path
+from .types import TimespanRow
 
 
 class TimespanBounds(TypedDict):
@@ -27,7 +28,7 @@ class TimespanAnalyzer:
         self.default_catalog = default_catalog
         self.current_date_provider = current_date_provider or date.today
 
-    def analyze(self, expression: exp.Expression) -> list[dict[str, str | None]]:
+    def analyze(self, expression: exp.Expression) -> list[TimespanRow]:
         return _flatten_timespans(_stringify_results(self._analyze_internal(expression)))
 
     def _analyze_internal(self, expression: exp.Expression) -> TimespanResults:
@@ -636,8 +637,8 @@ def _stringify_results(results: TimespanResults) -> dict[str, dict[str, str | No
 
 def _flatten_timespans(
     results: dict[str, dict[str, str | None]],
-) -> list[dict[str, str | None]]:
-    rows: list[dict[str, str | None]] = []
+) -> list[TimespanRow]:
+    rows: list[TimespanRow] = []
     for full_path, bounds in results.items():
         database, schema, table, column = full_path.split(".", 3)
         rows.append(

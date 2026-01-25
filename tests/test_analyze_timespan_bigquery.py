@@ -1,7 +1,7 @@
 import pytest
 from sqlglot import dialects
 
-from analytics_query_analyzer.analyzer import analyze_timespan
+from analytics_query_analyzer.analyzer import analyze
 
 schema = {
     "production": {
@@ -17,7 +17,16 @@ test_cases = [
     {
         "name": "without condition",
         "sql": "select ordered_at from shop.orders",
-        "expected": [],
+        "expected": [
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "ordered_at",
+                "lower": None,
+                "upper": None,
+            }
+        ],
     },
     {
         "name": "lower bound (>)",
@@ -27,10 +36,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -41,10 +66,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -55,10 +96,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": "2026-01-01",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -69,10 +126,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": "2026-01-01",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -83,10 +156,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": "2026-01-01",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -97,10 +186,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": "2026-01-01",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -112,10 +217,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": "2026-01-02",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -127,10 +248,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-02-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -141,10 +278,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -155,10 +308,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -169,10 +338,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -184,10 +369,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -198,10 +399,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -212,10 +429,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -227,10 +460,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -242,10 +491,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -257,10 +522,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -272,10 +553,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -286,10 +583,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -301,10 +614,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -316,10 +645,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-06",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -331,10 +676,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-02-28",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -346,10 +707,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-02-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -360,10 +737,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -375,10 +768,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -390,10 +799,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -404,10 +829,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -419,10 +860,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -434,10 +891,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -449,10 +922,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -464,10 +953,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -479,10 +984,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-02",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -494,10 +1015,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2025-12-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -508,10 +1045,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -522,10 +1075,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -536,10 +1105,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": "2026-01-01",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -551,10 +1136,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-02",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -566,10 +1167,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -581,10 +1198,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -596,10 +1229,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -610,10 +1259,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -625,10 +1290,26 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": "2026-01-02",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -640,10 +1321,42 @@ test_cases = [
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "users",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "users",
+                "column": "name",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -663,9 +1376,41 @@ test_cases = [
             {
                 "database": "production",
                 "schema": "shop",
+                "table": "events",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "events",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
                 "lower": "2026-01-01",
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
                 "upper": None,
             },
         ],
@@ -743,7 +1488,31 @@ test_cases = [
                 "column": "ordered_at",
                 "lower": None,
                 "upper": "2026-01-01",
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "users",
+                "column": "id",
+                "lower": None,
+                "upper": None,
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "users",
+                "column": "name",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -758,7 +1527,15 @@ test_cases = [
                 "column": "ordered_at",
                 "lower": "2026-01-01",
                 "upper": None,
-            }
+            },
+            {
+                "database": "production",
+                "schema": "shop",
+                "table": "orders",
+                "column": "user_id",
+                "lower": None,
+                "upper": None,
+            },
         ],
     },
     {
@@ -838,17 +1615,20 @@ test_cases = [
     ids=[case["name"] for case in test_cases],
 )
 def test_analyze_case(sql, expected):
-    result = analyze_timespan(dialects.BigQuery, sql, schema, "production")
+    result = analyze(
+        dialects.BigQuery, sql, schema, "production", include_timespan=True
+    )
     assert result == expected
 
 
 def test_current_date_provider():
     sql = "select * from shop.orders where ordered_at >= current_date()"
-    result = analyze_timespan(
+    result = analyze(
         dialects.BigQuery,
         sql,
         schema,
         "production",
+        include_timespan=True,
         current_date_provider=lambda: "2026-01-01",
     )
     assert result == [
@@ -856,20 +1636,37 @@ def test_current_date_provider():
             "database": "production",
             "schema": "shop",
             "table": "orders",
+            "column": "id",
+            "lower": None,
+            "upper": None,
+        },
+        {
+            "database": "production",
+            "schema": "shop",
+            "table": "orders",
             "column": "ordered_at",
             "lower": "2026-01-01",
             "upper": None,
-        }
+        },
+        {
+            "database": "production",
+            "schema": "shop",
+            "table": "orders",
+            "column": "user_id",
+            "lower": None,
+            "upper": None,
+        },
     ]
 
 
 def test_current_datetime_provider():
     sql = "select * from shop.orders where ordered_at >= current_datetime()"
-    result = analyze_timespan(
+    result = analyze(
         dialects.BigQuery,
         sql,
         schema,
         "production",
+        include_timespan=True,
         current_date_provider=lambda: "2026-01-01",
     )
     assert result == [
@@ -877,20 +1674,37 @@ def test_current_datetime_provider():
             "database": "production",
             "schema": "shop",
             "table": "orders",
+            "column": "id",
+            "lower": None,
+            "upper": None,
+        },
+        {
+            "database": "production",
+            "schema": "shop",
+            "table": "orders",
             "column": "ordered_at",
             "lower": "2026-01-01",
             "upper": None,
-        }
+        },
+        {
+            "database": "production",
+            "schema": "shop",
+            "table": "orders",
+            "column": "user_id",
+            "lower": None,
+            "upper": None,
+        },
     ]
 
 
 def test_current_timestamp_provider():
     sql = "select * from shop.orders where ordered_at >= current_timestamp()"
-    result = analyze_timespan(
+    result = analyze(
         dialects.BigQuery,
         sql,
         schema,
         "production",
+        include_timespan=True,
         current_date_provider=lambda: "2026-01-01",
     )
     assert result == [
@@ -898,8 +1712,24 @@ def test_current_timestamp_provider():
             "database": "production",
             "schema": "shop",
             "table": "orders",
+            "column": "id",
+            "lower": None,
+            "upper": None,
+        },
+        {
+            "database": "production",
+            "schema": "shop",
+            "table": "orders",
             "column": "ordered_at",
             "lower": "2026-01-01",
             "upper": None,
-        }
+        },
+        {
+            "database": "production",
+            "schema": "shop",
+            "table": "orders",
+            "column": "user_id",
+            "lower": None,
+            "upper": None,
+        },
     ]
