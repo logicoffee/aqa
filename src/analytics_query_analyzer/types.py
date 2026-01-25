@@ -8,6 +8,6 @@ class ReferenceRow(TypedDict):
     column: str
 
 
-class TimespanRow(ReferenceRow):
+class TimeboundsRow(ReferenceRow):
     lower: str | None
     upper: str | None

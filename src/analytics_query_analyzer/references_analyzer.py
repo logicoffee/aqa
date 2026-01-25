@@ -43,12 +43,12 @@ def _flatten_references(references: dict[str, set[str]]) -> list[ReferenceRow]:
         database, schema, table = table_path.split(".", 2)
         for column in columns:
             rows.append(
-                {
-                    "database": database,
-                    "schema": schema,
-                    "table": table,
-                    "column": column,
-                }
+                ReferenceRow(
+                    database=database,
+                    schema=schema,
+                    table=table,
+                    column=column,
+                )
             )
     rows.sort(
         key=lambda row: (row["database"], row["schema"], row["table"], row["column"])

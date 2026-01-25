@@ -1,8 +1,10 @@
+from typing import Literal, overload
+
 from sqlglot import dialects, optimizer, parse_one
 
 from .references_analyzer import ReferencesAnalyzer
-from .timespan_analyzer import TimespanAnalyzer
-from .types import ReferenceRow, TimespanRow
+from .timebounds_analyzer import TimeboundsAnalyzer
+from .types import ReferenceRow, TimeboundsRow
 
 
 def _resolve_dialect(
@@ -13,14 +15,36 @@ def _resolve_dialect(
     return dialect
 
 
+@overload
 def analyze(
     dialect: str | type[dialects.Dialect],
     sql: str,
     schema: dict,
     default_catalog: str,
-    include_timespan: bool = False,
+    with_timebounds: Literal[False] = False,
     current_date_provider=None,
-):
+) -> list[ReferenceRow]: ...
+
+
+@overload
+def analyze(
+    dialect: str | type[dialects.Dialect],
+    sql: str,
+    schema: dict,
+    default_catalog: str,
+    with_timebounds: Literal[True],
+    current_date_provider=None,
+) -> list[TimeboundsRow]: ...
+
+
+def analyze(
+    dialect: str | type[dialects.Dialect],
+    sql: str,
+    schema: dict,
+    default_catalog: str,
+    with_timebounds: bool = False,
+    current_date_provider=None,
+) -> list[ReferenceRow] | list[TimeboundsRow]:
     dialect = _resolve_dialect(dialect)
     expression = parse_one(sql, read=dialect)
 
@@ -31,26 +55,26 @@ def analyze(
         validate_qualify_columns=False,
     )
     analyzer = ReferencesAnalyzer(schema, default_catalog)
-    references = analyzer.analyze(qualified)
-    if not include_timespan:
+    references: list[ReferenceRow] = analyzer.analyze(qualified)
+    if not with_timebounds:
         return references
-    return _merge_timespans(
+    return _merge_timebounds(
         references,
-        TimespanAnalyzer(schema, default_catalog, current_date_provider).analyze(
+        TimeboundsAnalyzer(schema, default_catalog, current_date_provider).analyze(
             qualified
         ),
     )
 
 
-def _merge_timespans(
+def _merge_timebounds(
     references: list[ReferenceRow],
-    timespans: list[TimespanRow],
-) -> list[TimespanRow]:
-    merged: dict[tuple[str, str, str, str], TimespanRow] = {}
+    timebounds: list[TimeboundsRow],
+) -> list[TimeboundsRow]:
+    merged: dict[tuple[str, str, str, str], TimeboundsRow] = {}
     for row in references:
         key = (row["database"], row["schema"], row["table"], row["column"])
         merged[key] = {**row, "lower": None, "upper": None}
-    for row in timespans:
+    for row in timebounds:
         key = (row["database"], row["schema"], row["table"], row["column"])
         if key in merged:
             merged[key]["lower"] = row.get("lower")

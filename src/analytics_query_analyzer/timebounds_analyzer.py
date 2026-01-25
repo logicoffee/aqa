@@ -6,18 +6,18 @@ from sqlglot import exp
 from sqlglot.optimizer.scope import traverse_scope
 
 from .column_resolver import resolve_column_path
-from .types import TimespanRow
+from .types import TimeboundsRow
 
 
-class TimespanBounds(TypedDict):
+class TimeboundsBounds(TypedDict):
     lower: date | None
     upper: date | None
 
 
-TimespanResults: TypeAlias = dict[str, TimespanBounds]
+TimeboundsResults: TypeAlias = dict[str, TimeboundsBounds]
 
 
-class TimespanAnalyzer:
+class TimeboundsAnalyzer:
     def __init__(
         self,
         schema: dict,
@@ -28,10 +28,12 @@ class TimespanAnalyzer:
         self.default_catalog = default_catalog
         self.current_date_provider = current_date_provider or date.today
 
-    def analyze(self, expression: exp.Expression) -> list[TimespanRow]:
-        return _flatten_timespans(_stringify_results(self._analyze_internal(expression)))
+    def analyze(self, expression: exp.Expression) -> list[TimeboundsRow]:
+        return _flatten_timebounds(
+            _stringify_results(self._analyze_internal(expression))
+        )
 
-    def _analyze_internal(self, expression: exp.Expression) -> TimespanResults:
+    def _analyze_internal(self, expression: exp.Expression) -> TimeboundsResults:
         if isinstance(expression, exp.Union):
             with_expr = expression.args.get("with")
             left = expression.this.copy()
@@ -44,8 +46,8 @@ class TimespanAnalyzer:
             return self.merge_bounds_union(left_bounds, right_bounds)
         return self.analyze_scopes(expression)
 
-    def analyze_scopes(self, expression: exp.Expression) -> TimespanResults:
-        scoped_results: TimespanResults = {}
+    def analyze_scopes(self, expression: exp.Expression) -> TimeboundsResults:
+        scoped_results: TimeboundsResults = {}
         for scope in traverse_scope(expression):
             conditions = []
             where = scope.expression.args.get("where")
@@ -82,7 +84,9 @@ class TimespanAnalyzer:
 
         return scoped_results
 
-    def bounds_for_condition(self, condition: exp.Expression, scope) -> TimespanResults:
+    def bounds_for_condition(
+        self, condition: exp.Expression, scope
+    ) -> TimeboundsResults:
         if isinstance(condition, exp.Paren):
             return self.bounds_for_condition(condition.this, scope)
         if isinstance(condition, exp.Not):
@@ -134,7 +138,7 @@ class TimespanAnalyzer:
 
     def bounds_for_comparison(
         self, comparison: exp.Expression, scope
-    ) -> TimespanResults:
+    ) -> TimeboundsResults:
         if isinstance(comparison, exp.Between):
             column = self.extract_column(comparison.this)
             low = self.extract_literal(comparison.args.get("low"))
@@ -271,7 +275,9 @@ class TimespanAnalyzer:
             return columns[0]
         return None
 
-    def extract_literal(self, expr: exp.Expression) -> date | None:
+    def extract_literal(self, expr: exp.Expression | None) -> date | None:
+        if expr is None:
+            return None
         if isinstance(expr, exp.Literal):
             if expr.is_string:
                 return _normalize_iso_date(expr.this)
@@ -533,9 +539,9 @@ class TimespanAnalyzer:
 
     @staticmethod
     def merge_bounds_and(
-        left: TimespanResults, right: TimespanResults
-    ) -> TimespanResults:
-        merged: TimespanResults = {}
+        left: TimeboundsResults, right: TimeboundsResults
+    ) -> TimeboundsResults:
+        merged: TimeboundsResults = {}
         for key in set(left) | set(right):
             if key in left and key in right:
                 lower_left = left[key]["lower"]
@@ -563,9 +569,9 @@ class TimespanAnalyzer:
 
     @staticmethod
     def merge_bounds_or(
-        left: TimespanResults, right: TimespanResults
-    ) -> TimespanResults:
-        merged: TimespanResults = {}
+        left: TimeboundsResults, right: TimeboundsResults
+    ) -> TimeboundsResults:
+        merged: TimeboundsResults = {}
         for key in set(left) & set(right):
             lower_left = left[key]["lower"]
             lower_right = right[key]["lower"]
@@ -586,13 +592,13 @@ class TimespanAnalyzer:
 
     @staticmethod
     def merge_bounds_union(
-        left: TimespanResults, right: TimespanResults
-    ) -> TimespanResults:
+        left: TimeboundsResults, right: TimeboundsResults
+    ) -> TimeboundsResults:
         if not left:
             return right
         if not right:
             return left
-        merged: TimespanResults = {}
+        merged: TimeboundsResults = {}
         for key in set(left) | set(right):
             if key not in left:
                 merged[key] = right[key]
@@ -625,7 +631,9 @@ def _normalize_iso_date(value: str) -> date | None:
         return None
 
 
-def _stringify_results(results: TimespanResults) -> dict[str, dict[str, str | None]]:
+def _stringify_results(
+    results: TimeboundsResults,
+) -> dict[str, dict[str, str | None]]:
     output: dict[str, dict[str, str | None]] = {}
     for key, bounds in results.items():
         output[key] = {
@@ -635,21 +643,21 @@ def _stringify_results(results: TimespanResults) -> dict[str, dict[str, str | No
     return output
 
 
-def _flatten_timespans(
+def _flatten_timebounds(
     results: dict[str, dict[str, str | None]],
-) -> list[TimespanRow]:
-    rows: list[TimespanRow] = []
+) -> list[TimeboundsRow]:
+    rows: list[TimeboundsRow] = []
     for full_path, bounds in results.items():
         database, schema, table, column = full_path.split(".", 3)
         rows.append(
-            {
-                "database": database,
-                "schema": schema,
-                "table": table,
-                "column": column,
-                "lower": bounds.get("lower"),
-                "upper": bounds.get("upper"),
-            }
+            TimeboundsRow(
+                database=database,
+                schema=schema,
+                table=table,
+                column=column,
+                lower=bounds.get("lower"),
+                upper=bounds.get("upper"),
+            )
         )
     rows.sort(
         key=lambda row: (

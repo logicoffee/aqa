@@ -1616,7 +1616,7 @@ test_cases = [
 )
 def test_analyze_case(sql, expected):
     result = analyze(
-        dialects.BigQuery, sql, schema, "production", include_timespan=True
+        dialects.BigQuery, sql, schema, "production", with_timebounds=True
     )
     assert result == expected
 
@@ -1628,7 +1628,7 @@ def test_current_date_provider():
         sql,
         schema,
         "production",
-        include_timespan=True,
+        with_timebounds=True,
         current_date_provider=lambda: "2026-01-01",
     )
     assert result == [
@@ -1666,7 +1666,7 @@ def test_current_datetime_provider():
         sql,
         schema,
         "production",
-        include_timespan=True,
+        with_timebounds=True,
         current_date_provider=lambda: "2026-01-01",
     )
     assert result == [
@@ -1704,7 +1704,7 @@ def test_current_timestamp_provider():
         sql,
         schema,
         "production",
-        include_timespan=True,
+        with_timebounds=True,
         current_date_provider=lambda: "2026-01-01",
     )
     assert result == [

@@ -89,7 +89,7 @@ print(references)
 
 ### analyze with time bounds
 
-Extract time bounds from filters by enabling `include_timespan`.
+Extract time bounds from filters by enabling `with_timebounds`.
 
 ```python
 from analytics_query_analyzer import analyze
@@ -117,14 +117,14 @@ where
     and ordered_at < "2026-01-01"
 """
 
-timespans = analyze(
+timebounds = analyze(
     dialects.BigQuery,
     sql,
     schema,
     "production",
-    include_timespan=True,
+    with_timebounds=True,
 )
-print(timespans)
+print(timebounds)
 # [
 #   {
 #     "database": "production",
@@ -156,12 +156,12 @@ print(timespans)
 To make `current_date()` deterministic, pass a provider:
 
 ```python
-timespans = analyze(
+timebounds = analyze(
     dialects.BigQuery,
     "select * from shop.orders where ordered_at >= current_date()",
     schema,
     "production",
-    include_timespan=True,
+    with_timebounds=True,
     current_date_provider=lambda: "2026-01-01",
 )
 ```
