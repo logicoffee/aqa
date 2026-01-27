@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 from sqlglot import dialects
 
@@ -45,7 +47,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -75,7 +77,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -106,7 +108,7 @@ test_cases = [
                 "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
-                "upper": "2026-01-01",
+                "upper": date(2026, 1, 1),
             },
             {
                 "database": "production",
@@ -136,7 +138,7 @@ test_cases = [
                 "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
-                "upper": "2026-01-01",
+                "upper": date(2026, 1, 1),
             },
             {
                 "database": "production",
@@ -165,8 +167,8 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
-                "upper": "2026-01-01",
+                "lower": date(2026, 1, 1),
+                "upper": date(2026, 1, 1),
             },
             {
                 "database": "production",
@@ -195,8 +197,8 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
-                "upper": "2026-01-01",
+                "lower": date(2026, 1, 1),
+                "upper": date(2026, 1, 1),
             },
             {
                 "database": "production",
@@ -226,8 +228,8 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
-                "upper": "2026-01-02",
+                "lower": date(2026, 1, 1),
+                "upper": date(2026, 1, 2),
             },
             {
                 "database": "production",
@@ -257,7 +259,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-02-01",
+                "lower": date(2026, 2, 1),
                 "upper": None,
             },
             {
@@ -287,7 +289,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -317,7 +319,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -347,7 +349,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -378,7 +380,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -408,7 +410,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -438,7 +440,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -469,7 +471,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -500,7 +502,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -531,7 +533,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -562,7 +564,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -592,7 +594,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -623,7 +625,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -654,7 +656,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-06",
+                "lower": date(2026, 1, 6),
                 "upper": None,
             },
             {
@@ -685,7 +687,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-02-28",
+                "lower": date(2026, 2, 28),
                 "upper": None,
             },
             {
@@ -716,7 +718,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-02-01",
+                "lower": date(2026, 2, 1),
                 "upper": None,
             },
             {
@@ -746,7 +748,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -777,7 +779,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -808,7 +810,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -838,7 +840,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -869,7 +871,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -900,7 +902,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -931,7 +933,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -962,7 +964,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -993,7 +995,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-02",
+                "lower": date(2026, 1, 2),
                 "upper": None,
             },
             {
@@ -1024,7 +1026,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2025-12-01",
+                "lower": date(2025, 12, 1),
                 "upper": None,
             },
             {
@@ -1115,7 +1117,7 @@ test_cases = [
                 "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
-                "upper": "2026-01-01",
+                "upper": date(2026, 1, 1),
             },
             {
                 "database": "production",
@@ -1145,7 +1147,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-02",
+                "lower": date(2026, 1, 2),
                 "upper": None,
             },
             {
@@ -1176,7 +1178,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -1268,7 +1270,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -1299,8 +1301,8 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
-                "upper": "2026-01-02",
+                "lower": date(2026, 1, 1),
+                "upper": date(2026, 1, 2),
             },
             {
                 "database": "production",
@@ -1330,7 +1332,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -1370,7 +1372,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "events",
                 "column": "event_at",
-                "lower": "2026-01-02",
+                "lower": date(2026, 1, 2),
                 "upper": None,
             },
             {
@@ -1402,7 +1404,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -1425,7 +1427,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             }
         ],
@@ -1440,8 +1442,8 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
-                "upper": "2026-01-02",
+                "lower": date(2026, 1, 1),
+                "upper": date(2026, 1, 2),
             }
         ],
     },
@@ -1456,8 +1458,8 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
-                "upper": "2026-01-02",
+                "lower": date(2026, 1, 1),
+                "upper": date(2026, 1, 2),
             }
         ],
     },
@@ -1471,7 +1473,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             }
         ],
@@ -1487,7 +1489,7 @@ test_cases = [
                 "table": "orders",
                 "column": "ordered_at",
                 "lower": None,
-                "upper": "2026-01-01",
+                "upper": date(2026, 1, 1),
             },
             {
                 "database": "production",
@@ -1525,7 +1527,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
             {
@@ -1548,7 +1550,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             }
         ],
@@ -1563,7 +1565,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             }
         ],
@@ -1578,7 +1580,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             }
         ],
@@ -1594,14 +1596,14 @@ test_cases = [
                 "table": "events",
                 "column": "event_at",
                 "lower": None,
-                "upper": "2026-01-02",
+                "upper": date(2026, 1, 2),
             },
             {
                 "database": "production",
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": "2026-01-01",
+                "lower": date(2026, 1, 1),
                 "upper": None,
             },
         ],
@@ -1645,7 +1647,7 @@ def test_current_date_provider():
             "schema": "shop",
             "table": "orders",
             "column": "ordered_at",
-            "lower": "2026-01-01",
+            "lower": date(2026, 1, 1),
             "upper": None,
         },
         {
@@ -1683,7 +1685,7 @@ def test_current_datetime_provider():
             "schema": "shop",
             "table": "orders",
             "column": "ordered_at",
-            "lower": "2026-01-01",
+            "lower": date(2026, 1, 1),
             "upper": None,
         },
         {
@@ -1721,7 +1723,7 @@ def test_current_timestamp_provider():
             "schema": "shop",
             "table": "orders",
             "column": "ordered_at",
-            "lower": "2026-01-01",
+            "lower": date(2026, 1, 1),
             "upper": None,
         },
         {

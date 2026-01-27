@@ -29,9 +29,7 @@ class TimeboundsAnalyzer:
         self.current_date_provider = current_date_provider or date.today
 
     def analyze(self, expression: exp.Expression) -> list[TimeboundsRow]:
-        return _flatten_timebounds(
-            _stringify_results(self._analyze_internal(expression))
-        )
+        return _flatten_timebounds(self._analyze_internal(expression))
 
     def _analyze_internal(self, expression: exp.Expression) -> TimeboundsResults:
         if isinstance(expression, exp.Union):
@@ -631,20 +629,8 @@ def _normalize_iso_date(value: str) -> date | None:
         return None
 
 
-def _stringify_results(
-    results: TimeboundsResults,
-) -> dict[str, dict[str, str | None]]:
-    output: dict[str, dict[str, str | None]] = {}
-    for key, bounds in results.items():
-        output[key] = {
-            "lower": bounds["lower"].isoformat() if bounds["lower"] else None,
-            "upper": bounds["upper"].isoformat() if bounds["upper"] else None,
-        }
-    return output
-
-
 def _flatten_timebounds(
-    results: dict[str, dict[str, str | None]],
+    results: TimeboundsResults,
 ) -> list[TimeboundsRow]:
     rows: list[TimeboundsRow] = []
     for full_path, bounds in results.items():
