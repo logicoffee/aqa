@@ -1,3 +1,4 @@
+from datetime import date
 from typing import TypedDict
 
 
@@ -9,5 +10,5 @@ class ReferenceRow(TypedDict):
 
 
 class TimeboundsRow(ReferenceRow):
-    lower: str | None
-    upper: str | None
+    lower: date | None
+    upper: date | None
