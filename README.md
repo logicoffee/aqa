@@ -30,13 +30,10 @@ pip install analytics-query-analyzer[redshift]
 
 ### analyze
 
-Extract table/column references from a single SQL statement. Passing multiple
-statements raises `ValueError`. Dialects can be passed as classes or names such
-as `"bigquery"`.
+Extract table/column references from a single SQL statement. Passing multiple statements raises `ValueError`. Dialects can be passed as classes or names such as `"bigquery"`.
 
 Schema format follows sqlglot conventions, with nested fields represented as nested dicts.
-A table referenced without a specific column, such as in `COUNT(*)`, is returned
-with `column=None`.
+A table referenced without a specific column, such as in `COUNT(*)`, is returned with `column=None`.
 
 ```python
 from analytics_query_analyzer import analyze
@@ -159,15 +156,9 @@ print(timebounds)
 # ]
 ```
 
-Bounds are inclusive, conservative `date` values inferred from SQL predicates,
-not the actual scan range. Time-of-day precision is lost, and timezone-aware
-literals are converted to UTC. `None` means unbounded or unknown. For example,
-`ordered_at < DATE '2026-02-01'` yields an upper bound of `date(2026, 2, 1)`.
+Bounds are inclusive, conservative `date` values inferred from SQL predicates, not the actual scan range. Time-of-day precision is lost, and timezone-aware literals are converted to UTC. `None` means unbounded or unknown. For example, `ordered_at < DATE '2026-02-01'` yields an upper bound of `date(2026, 2, 1)`.
 
-For BigQuery, `_TABLE_SUFFIX` bounds are strings; `_PARTITIONDATE` and
-`_PARTITIONTIME` are also supported. Wildcard tables use the union of matching
-table schemas; conflicting field types and ambiguous references may be unknown.
-The default current date is evaluated in UTC.
+For BigQuery, `_TABLE_SUFFIX` bounds are strings; `_PARTITIONDATE` and `_PARTITIONTIME` are also supported. Wildcard tables use the union of matching table schemas; conflicting field types and ambiguous references may be unknown. The default current date is evaluated in UTC.
 
 To make `current_date()` deterministic, pass a provider:
 
