@@ -12,11 +12,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "sqlglot>=28",
+    "sqlglot>=28,<31",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
+dev = ["pytest>=8"]
 bigquery = ["google-cloud-bigquery"]
 redshift = ["redshift-connector"]
 

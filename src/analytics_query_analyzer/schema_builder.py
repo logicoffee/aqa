@@ -12,7 +12,9 @@ def build_schema(
     table: str | None = None,
 ):
     resolved = (
-        dialects.get_or_raise(dialect.lower()) if isinstance(dialect, str) else dialect
+        type(dialects.Dialect.get_or_raise(dialect.lower()))
+        if isinstance(dialect, str)
+        else dialect
     )
     if resolved not in SUPPORTED_DIALECTS:
         raise ValueError(f"Unsupported dialect for build_schema: {resolved.__name__}")

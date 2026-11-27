@@ -12,8 +12,24 @@ class ReferencesAnalyzer:
 
     def analyze(self, expression: exp.Expression) -> list[ReferenceRow]:
         references: dict[str, set[str]] = {}
+        tables: set[str] = set()
 
         for scope in traverse_scope(expression):
+            for _, source in scope.selected_sources.values():
+                if not isinstance(source, exp.Table):
+                    continue
+                project = source.catalog or self.default_catalog
+                dataset = source.db
+                if not dataset:
+                    matches = [
+                        name
+                        for name, values in self.schema.get(project, {}).items()
+                        if source.name in values
+                    ]
+                    if len(matches) != 1:
+                        continue
+                    dataset = matches[0]
+                tables.add(f"{project}.{dataset}.{source.name}")
             for column in scope.columns:
                 resolved = resolve_column_path(
                     column,
@@ -28,7 +44,22 @@ class ReferencesAnalyzer:
                 table_path = ".".join(full_path.split(".", 3)[:3])
                 _add(references, table_path, column_path)
 
-        return _flatten_references(references)
+        rows = _flatten_references(references)
+        for table_path in tables - references.keys():
+            database, schema, table = table_path.split(".", 2)
+            rows.append(
+                ReferenceRow(database=database, schema=schema, table=table, column=None)
+            )
+        return sorted(
+            rows,
+            key=lambda row: (
+                row["database"],
+                row["schema"],
+                row["table"],
+                row["column"] or "",
+            ),
+        )
+
 
 def _add(references: dict[str, set[str]], table: str, column: str):
     if table in references:

@@ -36,7 +36,7 @@ test_cases = [
     {
         "name": "referencing a table but not columns",
         "sql": "select count(1) from shop.orders",
-        "expected": [],
+        "expected": [{"database": "production", "schema": "shop", "table": "orders", "column": None}],
     },
     {
         "name": "simple column reference",
@@ -138,7 +138,7 @@ test_cases = [
     {
         "name": "using a wildcard with COUNT",
         "sql": "select count(*) from shop.users",
-        "expected": [],
+        "expected": [{"database": "production", "schema": "shop", "table": "users", "column": None}],
     },
     {
         "name": "selecting multiple columns",
