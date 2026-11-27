@@ -30,7 +30,9 @@ pip install analytics-query-analyzer[redshift]
 
 ### analyze
 
-Extract table/column references from a query.
+Extract table/column references from a single SQL statement. Passing multiple
+statements raises `ValueError`. Dialects can be passed as classes or names such
+as `"bigquery"`.
 
 Schema format follows sqlglot conventions, with nested fields represented as nested dicts.
 
@@ -92,6 +94,8 @@ print(references)
 Extract time bounds from filters by enabling `with_timebounds`.
 
 ```python
+from datetime import date
+
 from analytics_query_analyzer import analyze
 from sqlglot import dialects
 
@@ -139,8 +143,8 @@ print(timebounds)
 #     "schema": "shop",
 #     "table": "orders",
 #     "column": "ordered_at",
-#     "lower": "2025-01-01",
-#     "upper": "2026-01-01",
+#     "lower": date(2025, 1, 1),
+#     "upper": date(2026, 1, 1),
 #   },
 #   {
 #     "database": "production",
@@ -152,6 +156,37 @@ print(timebounds)
 #   },
 # ]
 ```
+
+The result describes a conservative envelope of values satisfying supported SQL
+predicates, per physical table and column. It does not describe the rows actually
+scanned or returned by the database. Bounds are **inclusive**: `lower` and
+`upper` are dates that the envelope includes. For example, an upper bound from
+`ordered_at < DATE '2026-02-01'` is `date(2026, 2, 1)` and conservatively
+includes that day. The result does not preserve whether the SQL operator was
+strict. Time-of-day precision is not retained; timezone-aware timestamp literals
+are converted to UTC before the day is selected. A `None` bound means that the
+side is unbounded or could not be determined, not that the query was unfiltered.
+Filters in separate reads of the same table are combined to cover every read.
+
+If a table is referenced without any particular column, as in `COUNT(*)`, it is
+returned with `column=None`. Unresolved table or column names can still be omitted;
+provide the relevant schema and fully qualified table names for best results.
+This nullable column is a change from earlier versions, which returned no row for
+such a table.
+
+BigQuery wildcard table names are returned as written (for example, `events_*`).
+When concrete matching tables exist in the supplied schema, the wildcard uses
+the union of their fields. Fields with conflicting types have an unknown type.
+This can include fields absent from the schema BigQuery selects at execution. `_TABLE_SUFFIX` bounds are **strings**,
+not dates: they preserve BigQuery's lexicographic suffix comparison and may
+contain non-date suffixes. `_PARTITIONDATE` and `_PARTITIONTIME` are recognized
+when referenced. Pseudo-columns are resolved automatically when their source
+is unambiguous. Unsupported expressions or ambiguous source attribution may
+produce `None` rather than a specific bound.
+
+The default current date is evaluated in UTC. As with any static analysis, the
+provider's value represents the evaluation time chosen by the caller and can
+differ from the eventual query execution time.
 
 To make `current_date()` deterministic, pass a provider:
 

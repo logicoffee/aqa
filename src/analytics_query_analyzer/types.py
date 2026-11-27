@@ -6,9 +6,9 @@ class ReferenceRow(TypedDict):
     database: str
     schema: str
     table: str
-    column: str
+    column: str | None
 
 
 class TimeboundsRow(ReferenceRow):
-    lower: date | None
-    upper: date | None
+    lower: date | str | None
+    upper: date | str | None

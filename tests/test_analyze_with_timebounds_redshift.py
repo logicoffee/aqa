@@ -505,7 +505,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": date(2026, 1, 1),
+                "lower": date(2025, 12, 31),
                 "upper": None,
             },
             {
@@ -536,7 +536,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": date(2026, 1, 1),
+                "lower": date(2025, 12, 31),
                 "upper": None,
             },
             {
@@ -1644,7 +1644,7 @@ test_cases = [
                 "schema": "shop",
                 "table": "orders",
                 "column": "ordered_at",
-                "lower": date(2026, 1, 1),
+                "lower": None,
                 "upper": None,
             }
         ],
